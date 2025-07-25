@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,14 +16,14 @@ import { UsersModule } from './users/users.module';
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false, // ⚠️ Disable in production
+        synchronize: true, // ⚠️ Disable in production
         ssl: {
           rejectUnauthorized: false, // ✅ Required by Supabase
         },
       }),
     }),
 
-    UsersModule
+    UsersModule, AuthModule
   ],
 })
-export class AppModule {}
+export class AppModule { }

@@ -9,6 +9,6 @@ async function bootstrap() {
   // Enable automatic validation using class-validator
   app.useGlobalPipes(new ValidationPipe());
 
-  await app.listen(3000);
+  await app.listen(3000);  
 }
 bootstrap();

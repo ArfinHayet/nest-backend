@@ -3,19 +3,30 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User) private userRepo: Repository<User>,
-  ) {}
+    private userRepo: UserRepository
+  ) { }
 
-  create(name: string, email: string) {
-    const user = this.userRepo.create({ name, email });
-    return this.userRepo.save(user);
+  create(createUserDto: CreateUserDto) {
+    const user = this.userRepo.create(createUserDto);
+    return user;
   }
 
   findAll() {
-    return this.userRepo.find();
+    return this.userRepo.findAll();
+  }
+
+  findByEmailOrPhone(identifier: string): Promise<User> {
+    const user = this.userRepo.findOneByCondition([
+      { email: identifier },
+      { phone: identifier },
+    ])
+
+    return user;
   }
 }
