@@ -1,4 +1,4 @@
-import { NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { NotFoundException, BadRequestException, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
@@ -36,7 +36,13 @@ export class AuthController {
     // auth.controller.ts
     @Post('signup')
     async signup(@Body() createUserDto: CreateUserDto) {
-        const { identifier, otp } = createUserDto;
+        const { identifier, otp, email, phone } = createUserDto;
+
+        // 0. Check if user already exists by email or phone
+        const existingUser = await this.usersService.findByEmailOrPhone(email ? email : phone);
+        if (existingUser) {
+            throw new ConflictException('User already exists with this email or phone number');
+        }
 
         // 1. Get latest OTP entry for this identifier
         const otpEntry = await this.otpService.findOtp(identifier)

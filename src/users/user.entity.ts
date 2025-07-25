@@ -33,7 +33,6 @@ export class User {
   @Column()
   role: string;
 
-  @Exclude()
   @Column()
   knowHow: string;
 }
