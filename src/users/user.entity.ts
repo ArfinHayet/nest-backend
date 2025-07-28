@@ -1,6 +1,7 @@
 // src/users/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import * as bcrypt from 'bcrypt';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -14,6 +15,9 @@ export class User {
 
   @Column({ unique: true })
   phone: string;
+
+  @Column({ type: 'varchar', length: 255 })
+  password: string;
 
   @Column()
   age: number;
@@ -35,4 +39,15 @@ export class User {
 
   @Column()
   knowHow: string;
+
+    // Hash password before inserting
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
+    // Only hash if password was changed (important for updates)
+    if (this.password && !this.password.startsWith('$2b$')) {
+      const salt = await bcrypt.genSalt(10);
+      this.password = await bcrypt.hash(this.password, salt);
+    }
+  }
 }

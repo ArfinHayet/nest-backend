@@ -3,7 +3,7 @@
  import { InjectRepository } from '@nestjs/typeorm';
  import { Repository } from 'typeorm';
  import { Otp } from './otp.entity';
- import { BaseRepository } from '../../core/base.repository';
+ import { BaseRepository } from '../core/base.repository';
  
  @Injectable()
  export class OtpRepository extends BaseRepository<Otp> {

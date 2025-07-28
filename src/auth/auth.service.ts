@@ -1,6 +1,6 @@
 // auth.service.ts
 import { Injectable } from '@nestjs/common';
-import bcrypt from "bcrypt"
+import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
 import { OtpService } from '../otp/otp.service';
 import { UsersService } from 'src/users/users.service';
@@ -44,10 +44,10 @@ export class AuthService {
   async validateUser(emailOrPhone: string, password: string): Promise<User | null> {
     const user: any = await this.usersService.findByEmailOrPhone(emailOrPhone);
     if (!user) return null;
-
     const isMatch = await bcrypt.compare(password, user.password);
     return isMatch ? user : null;
   }
+
 
   async login(user: User): Promise<{ access_token: string }> {
     const payload = { sub: user.id, email: user.email, role: user.role };

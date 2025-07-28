@@ -16,9 +16,14 @@ export class CreateUserDto {
   name: string;
 
   @ValidateIf((o) => !o.phone)
-  @IsEmail()
+  @IsEmail()  
   @IsNotEmpty()
   email?: string;
+
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 
   @ValidateIf((o) => !o.email)
   @IsString()
@@ -62,4 +67,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   identifier: string; // email or phone
+
+
+
 }
