@@ -35,16 +35,32 @@ export class AppController {
             font-size: 1.2rem;
             color: #555;
             margin-top: 0.5rem;
+            margin-bottom: 1rem;
+          }
+          button {
+            padding: 0.6rem 1.2rem;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+          }
+          button:hover {
+            background-color: #1a252f;
           }
         </style>
       </head>
       <body>
         <h1>🚀 API is running</h1>
         <p>Welcome to the backend server</p>
+        <button onclick="location.href='/api-docs'">See API Docs</button>
       </body>
     </html>
   `;
   }
+
 
 
 }
