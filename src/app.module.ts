@@ -6,6 +6,9 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { PatientModule } from './patient/patient.module';
+import { AssessmentModule } from './assessment/assessment.module';
+import { QuestioneerModule } from './questioneer/questioneer.module';
 
 @Module({
   imports: [
@@ -25,7 +28,7 @@ import { AppService } from './app.service';
       }),
     }),
 
-    UsersModule, AuthModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule
   ],
   controllers: [AppController],
   providers: [AppService]

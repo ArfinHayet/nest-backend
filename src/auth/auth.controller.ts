@@ -1,8 +1,8 @@
-import { 
-    NotFoundException, 
-    BadRequestException, 
-    UnauthorizedException, 
-    ConflictException 
+import {
+    NotFoundException,
+    BadRequestException,
+    UnauthorizedException,
+    ConflictException
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
@@ -24,7 +24,7 @@ export class AuthController {
         private readonly usersService: UsersService,
         private otpService: OtpService,
         @InjectDataSource() private readonly dataSource: DataSource,
-    ) {}
+    ) { }
 
     @Post('send-otp')
     async sendOtp(@Body() dto: SendOtpDto) {
@@ -70,6 +70,12 @@ export class AuthController {
         const existingUser = await this.usersService.findByEmailOrPhone(identifier);
         if (existingUser) {
             throw new ConflictException('User already exists with this email or phone number');
+        }
+
+        if (createUserDto.role === "admin") {
+            const user = await this.usersService.create(createUserDto);
+            const token = await this.authService.login(user);
+            return sendResponse({ user, token }, 'User created and logged in successfully', 201);
         }
 
         const otpEntry = await this.otpService.findOtp(identifier);
