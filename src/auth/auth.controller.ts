@@ -5,6 +5,7 @@ import {
     ConflictException
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { omit } from 'lodash';
 import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
@@ -108,8 +109,9 @@ export class AuthController {
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
-
+ 
         const token = await this.authService.login(user);
-        return sendResponse({ user, token }, 'User logged in successfully', 200);
+        const filteredUser = omit(user, ['password']);
+        return sendResponse({ filteredUser, token }, 'User logged in successfully', 200);
     }
 }

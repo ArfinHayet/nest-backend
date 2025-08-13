@@ -37,7 +37,6 @@ export class BaseRepository<T> {
   findOneByCondition(
     condition: FindOptionsWhere<T> | FindOptionsWhere<T>[],
     orderByDesc?: keyof T,
-    excludeField: keyof T | null = null, // new parameter
   ): Promise<T | null> {
     const options: any = {
       where: condition,
@@ -49,13 +48,6 @@ export class BaseRepository<T> {
       };
     }
 
-    if (excludeField) {
-      // Include all fields except the excluded one
-      const allFields = this.repo.metadata.columns.map(col => col.propertyName);
-      options.select = allFields.filter(f => f !== excludeField);
-    }
-
     return this.repo.findOne(options);
   }
-
 }
