@@ -4,13 +4,20 @@ import { AssessmentService } from './assessment.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { Assessment } from './assessment.entity';
 import { sendResponse } from 'src/utils/send-response';
+import { AuthGuard } from '@nestjs/passport';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
+
+@UseGuards(AuthGuard('jwt'),RolesGuard)
 @ApiTags('Assessments')
 @Controller('assessments')
 export class AssessmentController {
   constructor(private readonly assessmentService: AssessmentService) {}
 
   @Post()
+  @Roles('admin')
   @ApiOperation({ summary: 'Create a new assessment' })
   @ApiResponse({ status: 201, description: 'Assessment created', type: Assessment })
   async create(@Body() dto: CreateAssessmentDto) {
@@ -19,6 +26,7 @@ export class AssessmentController {
   }
  
   @Get() 
+  @Roles('user','admin')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findAll() {

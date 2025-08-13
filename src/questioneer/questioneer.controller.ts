@@ -3,8 +3,11 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { QuestionnaireService } from '../questioneer/questioneer.service';
 import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
 import { Questionnaire } from '../questioneer/questioneer.entity';
-import { sendResponse } from 'src/utils/send-response';
+import { sendResponse } from 'src/utils/send-response';   
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiTags('Questionnaires')
 @Controller('questionnaires')
 export class QuestionnaireController {

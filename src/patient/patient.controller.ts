@@ -4,7 +4,10 @@ import { PatientService } from './patient.service';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { Patient } from './patient.entity';
 import { sendResponse } from 'src/utils/send-response';
+import { AuthGuard } from '@nestjs/passport';
+import { UseGuards } from '@nestjs/common';
 
+@UseGuards(AuthGuard('jwt'))
 @ApiTags('Patients')
 @Controller('patient')
 export class PatientController {

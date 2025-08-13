@@ -90,7 +90,8 @@ export class AuthController {
         }
 
         await this.otpService.removeOtp(otpEntry.id);
-        const user = await this.usersService.create(createUserDto);
+        let user = await this.usersService.create(createUserDto);
+        user = omit(user, ['password']);
         const token = await this.authService.login(user);
 
         return sendResponse({ user, token }, 'User created and logged in successfully', 201);
