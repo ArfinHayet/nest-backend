@@ -58,7 +58,7 @@ export class AuthController {
             throw new UnauthorizedException('Invalid OTP');
         }
 
-        await this.otpService.removeOtp(otpEntry.id);
+        // await this.otpService.removeOtp(otpEntry.id);
         return sendResponse({ verified: true }, 'OTP verified successfully', 200);
     }
 

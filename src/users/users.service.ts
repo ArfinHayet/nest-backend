@@ -23,7 +23,7 @@ export class UsersService {
     const user = this.userRepo.findOneByCondition([
       { email: identifier },
       { phone: identifier },
-    ])
+    ], 'password' )
 
     return user;
   }
