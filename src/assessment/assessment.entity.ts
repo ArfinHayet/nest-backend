@@ -16,4 +16,7 @@ export class Assessment {
 
   @Column({ type: 'enum', enum: ['free', 'premium'] })
   type: 'free' | 'premium';
+
+  @Column({ type: 'text', nullable: true })
+  totalTime: string;
 }

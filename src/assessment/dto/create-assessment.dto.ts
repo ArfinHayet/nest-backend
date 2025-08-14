@@ -15,7 +15,7 @@ export class CreateAssessmentDto {
   })
   @IsString()
   description: string;
-
+  
   @ApiProperty({
     description: 'Type of the assessment',
     example: 'free',
@@ -24,4 +24,12 @@ export class CreateAssessmentDto {
   @IsString()
   @IsIn(['free', 'premium'])
   type: 'free' | 'premium';
+  
+
+  @ApiProperty({
+    description: 'total time in minutes',
+    example: '5 minutes',
+  })
+  @IsString()
+  totalTime: string
 }

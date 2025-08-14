@@ -19,7 +19,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   // Enable automatic validation using class-validator
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
 
 

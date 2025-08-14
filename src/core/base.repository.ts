@@ -16,6 +16,7 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
     return this.repo.save(entity);
   }
 
+
   deleteById(id: number): Promise<void> {
     return this.repo.delete(id).then(() => undefined);
   }
@@ -55,33 +56,6 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
   /**
    * Update the order of an item and shift other items accordingly
    */
-async insertWithOrder(newData: Partial<T>, desiredOrder?: number): Promise<T> {
-  const repo = this.repo;
-  const tableName = repo.metadata.tableName;
-
-  // Get current max order
-  const maxOrderRow = await repo
-    .createQueryBuilder(tableName)
-    .select('MAX("order")', 'max')
-    .getRawOne<{ max: number }>();
-
-  const maxOrder = maxOrderRow?.max ?? 0;
-  const newOrder = desiredOrder ?? maxOrder + 1;
-
-  // Shift existing rows if inserting in the middle
-  if (newOrder <= maxOrder) {
-    await repo
-      .createQueryBuilder()
-      .update(tableName)
-      .set({ order: () => `"order" + 1` } as any)
-      .where('"order" >= :newOrder', { newOrder })
-      .execute();
-  }
-
-  // Create and save new item
-  const newItem = repo.create({ ...newData, order: newOrder } as DeepPartial<T>) as T;
-  return repo.save(newItem);
-}
 
 
 
