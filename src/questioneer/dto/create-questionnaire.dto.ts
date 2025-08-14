@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString } from 'class-validator';
+import { IsInt, IsString, IsNumber, IsEnum } from 'class-validator';
+
+
+export enum AnswerType {
+  YES_NO = 'Yes/No',
+  TEXT = 'Text',
+  MULTIPLE_CHOICE = 'MultipleChoice',
+}
 
 export class CreateQuestionnaireDto {
   @ApiProperty({
@@ -15,4 +22,21 @@ export class CreateQuestionnaireDto {
   })
   @IsString()
   questions: string;
+
+
+  @ApiProperty({
+    description: 'Order of the question',
+    example: 1,
+  })
+  @IsNumber()
+  order: number;
+
+
+  @ApiProperty({
+    description: 'Answer type',
+    enum: AnswerType,
+    example: AnswerType.YES_NO,
+  })
+  @IsEnum(AnswerType)
+  answerType: AnswerType;
 }

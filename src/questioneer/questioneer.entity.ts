@@ -10,7 +10,7 @@ export class Questionnaire {
   @JoinColumn({ name: 'assessmentId' })
   assessment: Assessment;
 
-  @Column()
+  @Column() 
   assessmentId: number; // Foreign key column
 
   @Column({ type: 'text' })
@@ -18,4 +18,12 @@ export class Questionnaire {
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  @Column({ default: 0 })
+  order: number;
+
+  @Column({ type: 'text', nullable: true })
+  answerType : string;
+
+
 }

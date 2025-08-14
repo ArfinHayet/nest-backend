@@ -5,11 +5,16 @@ import { Questionnaire } from '../questioneer/questioneer.entity';
 
 @Injectable()
 export class QuestionnaireService {
-  constructor(private readonly questionnaireRepository: QuestionnaireRepository) {}
+  constructor(private readonly questionnaireRepository: QuestionnaireRepository) { }
 
   async create(dto: CreateQuestionnaireDto): Promise<Questionnaire> {
-    return this.questionnaireRepository.create(dto);
+    // Use the repository's insertWithOrder method
+    const newQuestionnaire = await this.questionnaireRepository.insertWithOrder(dto, dto.order);
+    return newQuestionnaire;
   }
+
+
+
 
   async findAll(): Promise<Questionnaire[]> {
     return this.questionnaireRepository.findAll();
