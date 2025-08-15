@@ -5,9 +5,10 @@ import { User } from './user.entity';
 import { UsersService } from './users.service';
 import { UserRepository  } from './user.repository';
 import { UsersController } from './users.controller';
+import { PatientModule } from 'src/patient/patient.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User]), PatientModule],
   providers: [UsersService,UserRepository],
   exports: [UsersService, UserRepository], 
   controllers: [UsersController],

@@ -31,7 +31,7 @@ export class Patient {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
+  @Column({ nullable: false })
   userId: number;
 
   
