@@ -26,7 +26,7 @@ export class AssessmentController {
   }
  
   @Get() 
-  @Roles('user','admin')
+  @Roles('admin','user')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findAll() {

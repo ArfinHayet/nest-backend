@@ -7,6 +7,7 @@ import { Questionnaire } from '../questioneer/questioneer.entity';
 import { sendResponse } from 'src/utils/send-response';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/auth/roles.decorator';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Questionnaires')
@@ -15,6 +16,7 @@ export class QuestionnaireController {
   constructor(private readonly questionnaireService: QuestionnaireService) { }
 
   @Post()
+  @Roles('admin')
   @ApiOperation({ summary: 'Create a new questionnaire' })
   @ApiResponse({ status: 201, description: 'Questionnaire created successfully', type: Questionnaire })
   async create(@Body() dto: CreateQuestionnaireDto) {
@@ -24,6 +26,7 @@ export class QuestionnaireController {
 
 
   @Put(':id')
+  @Roles('admin')
   @ApiOperation({ summary: 'Update a questionnaire' })
   @ApiResponse({ status: 201, description: 'Questionnaire Updated successfully', type: Questionnaire })
   async update(
@@ -36,6 +39,7 @@ export class QuestionnaireController {
 
 
   @Get()
+  @Roles('admin','user')
   @ApiOperation({ summary: 'Get all questionnaires' })
   @ApiResponse({ status: 200, description: 'List of questionnaires', type: [Questionnaire] })
   async findAll() {

@@ -1,4 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { User } from 'src/users/user.entity';
+import { ManyToOne } from 'typeorm';
+import { JoinColumn } from 'typeorm';
 
 @Entity()
 export class Patient {
@@ -22,4 +25,14 @@ export class Patient {
 
   @Column({ nullable: true })
   profileTag: string;
+
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column()
+  userId: number;
+
+  
 }

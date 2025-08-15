@@ -21,7 +21,15 @@ async function bootstrap() {
   // Enable automatic validation using class-validator
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
+  
 
+  // Enable CORS for all origins
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*',
+    credentials: true, // optional, if you need cookies or authorization headers
+  });
 
 
   await app.listen(3000);

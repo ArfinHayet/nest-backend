@@ -6,6 +6,7 @@ import { Patient } from './patient.entity';
 import { sendResponse } from 'src/utils/send-response';
 import { AuthGuard } from '@nestjs/passport';
 import { UseGuards } from '@nestjs/common';
+import { Roles } from 'src/auth/roles.decorator';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Patients')
@@ -14,6 +15,7 @@ export class PatientController {
   constructor(private readonly patientService: PatientService) { }
 
   @Post()
+  @Roles('admin','user')
   @ApiOperation({ summary: 'Create a new patient' })
   @ApiResponse({ status: 201, description: 'Patient successfully created', type: Patient })
   async create(@Body() createPatientDto: CreatePatientDto) {
@@ -22,6 +24,7 @@ export class PatientController {
   }
 
   @Get()
+  @Roles('admin')
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'List of patients', type: [Patient] })
   async findAll() {

@@ -16,4 +16,9 @@ export class PatientService {
   async findAll() {
     return this.patientRepository.findAll()
   }
+
+  async findPatientsByUser(userId: number) {
+  return this.patientRepository.findByField('user', { id: userId } as any);
+}
+
 }
