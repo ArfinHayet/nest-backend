@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRepository } from './user.repository';
+import { omit } from "lodash"
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,12 @@ export class UsersService {
 
   findAll() {
     return this.userRepo.findAll();
+  }
+
+  async findById(id: number) {
+    let user = await this.userRepo.findById(id)
+    user = omit(user, ['password']);
+    return user;
   }
 
   findByEmailOrPhone(identifier: string): Promise<User> {

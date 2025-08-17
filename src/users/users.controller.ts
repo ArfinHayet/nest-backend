@@ -9,34 +9,45 @@ import { Roles } from 'src/auth/roles.decorator';
 import { ApiParam } from '@nestjs/swagger';
 import { ParseIntPipe } from '@nestjs/common';
 import { PatientService } from 'src/patient/patient.service';
- 
 
-@UseGuards(AuthGuard('jwt'),RolesGuard)
+
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService, private patientService : PatientService) {}
-  
+  constructor(private readonly usersService: UsersService, private patientService: PatientService) { }
+
   @Roles('admin')
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.usersService.create(createUserDto);
-    return sendResponse(user,'User created successfully',201)
+    return sendResponse(user, 'User created successfully', 201)
   }
   @Roles('admin')
   @Get()
   async findAll() {
     const users = await this.usersService.findAll();
-    return sendResponse(users,'User retrieved successfully',201)
+    return sendResponse(users, 'User retrieved successfully', 201)
   }
 
-  @Roles('admin','user')
+
+  @Roles('admin', 'user')
+  @Get(':id/') // ✅ Define path properly
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  async findById(
+    @Param('id', ParseIntPipe) userId: number,
+  ) {
+    const patient = await this.usersService.findById(userId)
+    return sendResponse(patient, 'User retrieved successfully', 201)
+  }
+
+  @Roles('admin', 'user')
   @Get(':id/patients') // ✅ Define path properly
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async getPatientsByUser(
     @Param('id', ParseIntPipe) userId: number,
   ) {
     const patient = await this.patientService.findPatientsByUser(userId);
-    return sendResponse(patient,'Patient retrieved successfully',201)
+    return sendResponse(patient, 'Patient retrieved successfully', 201)
   }
 
 }
