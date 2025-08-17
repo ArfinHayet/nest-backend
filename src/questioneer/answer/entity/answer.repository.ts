@@ -5,7 +5,7 @@ import { BaseRepository } from 'src/core/base.repository';
 import { Answer } from './answer.entity';
 
 @Injectable()
-export class QuestionnaireRepository extends BaseRepository<Answer> {
+export class AnswerRepository extends BaseRepository<Answer> {
   constructor(
     @InjectRepository(Answer)
     private readonly answerRepo: Repository<Answer>,

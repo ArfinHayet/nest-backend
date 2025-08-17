@@ -8,6 +8,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { Query } from '@nestjs/common';
 
 
 @UseGuards(AuthGuard('jwt'),RolesGuard)
@@ -29,8 +30,8 @@ export class AssessmentController {
   @Roles('admin','user')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
-  async findAll() {
-    const assessments = await this.assessmentService.findAll();
+  async findAll(@Query() query: Record<string, any>) {
+    const assessments = await this.assessmentService.findAll(query);
     return sendResponse(assessments,'assessments retrieved successfully',200)
   }
 }

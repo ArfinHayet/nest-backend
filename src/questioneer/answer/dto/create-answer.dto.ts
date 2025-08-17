@@ -21,5 +21,5 @@ export class CreateAnswerDto {
   @ApiProperty({ example: 'Yes/No', description: 'Yes/No' })
   @IsString()
   @IsNotEmpty()
-  answer: string;
+  answer: string; 
 }
