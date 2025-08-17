@@ -24,4 +24,8 @@ export class AssessmentService {
   async findAll(query) {
     return this.assessmentRepository.findAll(query as any);
   }
+
+  async findById(id) {
+    return this.assessmentRepository.findById(id) 
+  }
 }

@@ -22,4 +22,10 @@ export class CreateAnswerDto {
   @IsString()
   @IsNotEmpty()
   answer: string; 
+
+  @ApiProperty({ example: '2', description: 'Assessment Id' })
+  @IsNumber()
+  @IsNotEmpty()
+  assessmentId: number; 
+
 }

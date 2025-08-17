@@ -13,7 +13,11 @@ export class SubmissionService {
     return this.submissionRepository.create(dto);
   }
 
-  async findAll(query: Record<string, any>): Promise<Submission[]> {
-    return this.submissionRepository.findAll(query as any);
+  async findAll(query: Record<string, any>, includeRelations : boolean): Promise<Submission[]> {
+    return this.submissionRepository.findAll(query as any,includeRelations);
+  }
+
+    async findByAssessment(id) {
+    return this.submissionRepository.findByField('assessmentId',id)
   }
 }

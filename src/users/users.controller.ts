@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { sendResponse } from 'src/utils/send-response';
@@ -24,8 +24,8 @@ export class UsersController {
   }
   @Roles('admin')
   @Get()
-  async findAll() {
-    const users = await this.usersService.findAll();
+  async findAll(@Query() query: Record<string, any>) {
+    const users = await this.usersService.findAll(query);
     return sendResponse(users, 'User retrieved successfully', 201)
   }
 

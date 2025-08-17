@@ -8,7 +8,7 @@ import { omit } from "lodash"
 @Injectable()
 export class UsersService {
   constructor(
-    private userRepo: UserRepository 
+    private userRepo: UserRepository
   ) { }
 
   create(createUserDto: CreateUserDto) {
@@ -16,8 +16,10 @@ export class UsersService {
     return user;
   }
 
-  findAll() {
-    return this.userRepo.findAll();
+  async findAll(query) {
+    const users = await this.userRepo.findAll(query);
+    // Remove password field from each user
+    return users.map(user => omit(user, ['password']));
   }
 
   async findById(id: number) {

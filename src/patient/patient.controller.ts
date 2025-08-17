@@ -7,6 +7,7 @@ import { sendResponse } from 'src/utils/send-response';
 import { AuthGuard } from '@nestjs/passport';
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/roles.decorator';
+import { Query } from '@nestjs/common';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Patients')
@@ -27,8 +28,9 @@ export class PatientController {
   @Roles('admin')
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'List of patients', type: [Patient] })
-  async findAll() {
-    const patient = await this.patientService.findAll();
+  async findAll(@Query() query: Record<string, any>) {
+    const patient = await this.patientService.findAll(query);
     return sendResponse(patient,'Patient retrieved successfully',200)
   }
 }
+   

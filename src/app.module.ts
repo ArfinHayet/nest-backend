@@ -17,7 +17,7 @@ import { SubmissionModule } from './submission/submission.module';
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
+      inject: [ConfigService],  
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.get<string>('DATABASE_URL'),
@@ -35,3 +35,4 @@ import { SubmissionModule } from './submission/submission.module';
   providers: [AppService]
 })
 export class AppModule { }
+   

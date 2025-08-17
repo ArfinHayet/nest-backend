@@ -13,8 +13,8 @@ export class PatientService {
     return await this.patientRepository.create(createPatientDto);
   }
 
-  async findAll() {
-    return this.patientRepository.findAll()
+  async findAll(query) {
+    return this.patientRepository.findAll(query as any)
   }
 
   async findPatientsByUser(userId: number) {
