@@ -21,7 +21,7 @@ export class QuestionnaireService {
     return newQuestionnaire;
   }
 
-  async findAll(): Promise<Questionnaire[]> {
-    return this.questionnaireRepository.findAll();
+  async findAll(query): Promise<Questionnaire[]> {
+    return this.questionnaireRepository.findAll(query as any);  
   }
 }

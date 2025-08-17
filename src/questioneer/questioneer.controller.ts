@@ -8,6 +8,7 @@ import { sendResponse } from 'src/utils/send-response';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/roles.decorator';
+import { Query } from '@nestjs/common';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Questionnaires')
@@ -42,8 +43,8 @@ export class QuestionnaireController {
   @Roles('admin','user')
   @ApiOperation({ summary: 'Get all questionnaires' })
   @ApiResponse({ status: 200, description: 'List of questionnaires', type: [Questionnaire] })
-  async findAll() {
-    const questions = await this.questionnaireService.findAll();
+  async findAll(@Query() query: Record<string, any>) {
+    const questions = await this.questionnaireService.findAll(query);
     return sendResponse(questions, 'questions retrieved successfully', 201)
   }
 }

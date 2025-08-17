@@ -33,5 +33,5 @@ export class AssessmentController {
   async findAll(@Query() query: Record<string, any>) {
     const assessments = await this.assessmentService.findAll(query);
     return sendResponse(assessments,'assessments retrieved successfully',200)
-  }
+  }   
 }
