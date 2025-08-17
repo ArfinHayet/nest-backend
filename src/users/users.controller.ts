@@ -8,8 +8,6 @@ import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { ApiParam } from '@nestjs/swagger';
 import { ParseIntPipe } from '@nestjs/common';
-import { CreatePatientDto } from 'src/patient/dto/create-patient.dto';
-import { Patient } from 'src/patient/patient.entity';
 import { PatientService } from 'src/patient/patient.service';
  
 
@@ -31,8 +29,8 @@ export class UsersController {
     return sendResponse(users,'User retrieved successfully',201)
   }
 
-
-  @Get()
+  @Roles('admin','user')
+  @Get(':id/patients') // ✅ Define path properly
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async getPatientsByUser(
     @Param('id', ParseIntPipe) userId: number,

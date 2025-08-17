@@ -47,4 +47,17 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   profileTag?: string;
+
+
+
+  @ApiProperty({
+    description: "Userid ",
+    example: "1",
+    required: false,
+  })
+  @IsString()
+  userId: number;
+
+
+
 }
