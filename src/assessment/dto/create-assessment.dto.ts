@@ -32,4 +32,12 @@ export class CreateAssessmentDto {
   })
   @IsString()
   totalTime: string
+
+
+  @ApiProperty({
+    description: 'category of assessment',
+    example: '5 minutes',
+  })
+  @IsString()
+  category: string
 }

@@ -19,4 +19,8 @@ export class Assessment {
 
   @Column({ type: 'text', nullable: true })
   totalTime: string;
+
+
+  @Column({ type: 'text', nullable: true })
+  category: string;
 }
