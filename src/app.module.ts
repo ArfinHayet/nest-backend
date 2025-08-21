@@ -10,6 +10,7 @@ import { PatientModule } from './patient/patient.module';
 import { AssessmentModule } from './assessment/assessment.module';
 import { QuestioneerModule } from './questioneer/questioneer.module';
 import { SubmissionModule } from './submission/submission.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { SubmissionModule } from './submission/submission.module';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule
   ],
   controllers: [AppController],
   providers: [AppService]

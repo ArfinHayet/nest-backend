@@ -20,7 +20,10 @@ export class Assessment {
   @Column({ type: 'text', nullable: true })
   totalTime: string;
 
-
   @Column({ type: 'text', nullable: true })
   category: string;
+
+  // ✅ New price field
+  @Column({ type: 'text', nullable: true })
+  priceId: string;
 }
