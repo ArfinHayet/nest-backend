@@ -17,7 +17,7 @@ export class PaymentController {
     @Body() body: { priceId: string },
     @Req() req: any, // req.user is added by JwtStrategy
   ) {
-    const userId = req.user.id; // ✅ extract userId from JWT
+    const userId = req.user.userId; // ✅ extract userId from JWT
     return this.paymentService.createCheckoutSession(body.priceId, userId);
   }
 
