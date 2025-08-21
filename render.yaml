@@ -1,9 +1,0 @@
-services:
-  - type: web
-    name: my-nest-app
-    env: node
-    buildCommand: npm run build
-    startCommand: npm run start:prod
-    envVars:
-      - key: NODE_OPTIONS
-        value: "--max-old-space-size=4096"
