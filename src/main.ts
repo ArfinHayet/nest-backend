@@ -4,10 +4,13 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import axios from 'axios';
+import * as express from 'express';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
+  // ✅ Raw body only for Stripe webhook
+  app.use('/payment/webhook', express.raw({ type: '*/*' }));
   const config = new DocumentBuilder()
     .setTitle('My API')
     .setDescription('The API documentation')
@@ -21,7 +24,7 @@ async function bootstrap() {
   // Enable automatic validation using class-validator
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
-  
+
 
   // Enable CORS for all origins
   app.enableCors({
