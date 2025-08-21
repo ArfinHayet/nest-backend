@@ -22,6 +22,9 @@ export class Questionnaire {
   @Column({ default: 0 })
   order: number;
 
+  @Column("text", { array: true, nullable: true })
+  options: string[];
+
   @Column({ type: 'text', nullable: true })
   answerType : string;
 
