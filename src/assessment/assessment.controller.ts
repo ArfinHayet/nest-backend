@@ -31,7 +31,7 @@ export class AssessmentController {
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findAll(@Query() query: Record<string, any>) {
-    const assessments = await this.assessmentService.findAll(query);
+    const assessments = await this.assessmentService.findAll(query); 
     return sendResponse(assessments,'assessments retrieved successfully',200)
   }   
 }

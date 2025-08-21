@@ -26,4 +26,4 @@ export class Assessment {
   // ✅ New price field
   @Column({ type: 'text', nullable: true })
   priceId: string;
-}
+}   

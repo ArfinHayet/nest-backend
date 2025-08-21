@@ -10,7 +10,7 @@ async function bootstrap() {
   // ✅ Raw body only for Stripe webhook
   const config = new DocumentBuilder()
     .setTitle('My API')
-    .setDescription('The API documentation')
+    .setDescription('The API documentation')   
     .setVersion('1.0')
     .addTag('auth')
     .build();

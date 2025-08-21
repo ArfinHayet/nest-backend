@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsIn, IsNumber, ValidateIf, Min, Max } from 'class-validator';
+import { IsString, IsIn } from 'class-validator';
 
 export class CreateAssessmentDto {
   @ApiProperty({
@@ -15,7 +15,7 @@ export class CreateAssessmentDto {
   })
   @IsString()
   description: string;
-  
+
   @ApiProperty({
     description: 'Type of the assessment',
     example: 'free',
@@ -24,7 +24,7 @@ export class CreateAssessmentDto {
   @IsString()
   @IsIn(['free', 'premium'])
   type: 'free' | 'premium';
-  
+
   @ApiProperty({
     description: 'Total time in minutes',
     example: '5 minutes',
@@ -39,15 +39,10 @@ export class CreateAssessmentDto {
   @IsString()
   category: string;
 
-  // ✅ Single price field with conditional validation
   @ApiProperty({
-    description: 'Price of the assessment (0 if free, >0 if premium)',
-    example: 9.99,
+    description: 'price id from stripe',
+    example: 'Aptitude Test',
   })
-  @IsNumber()
-  @ValidateIf(o => o.type === 'free')
-  @Max(0, { message: 'Price must be 0 when type is free' })
-  @ValidateIf(o => o.type === 'premium')
-  @Min(1, { message: 'Price must be greater than 0 when type is premium' })
-  price: number;
+  @IsString()
+  priceId: string;   
 }

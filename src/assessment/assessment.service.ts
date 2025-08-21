@@ -3,7 +3,7 @@ import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { AssessmentRepository } from './assessment.repository';
 import { Assessment } from './assessment.entity';
 import { BadRequestException } from '@nestjs/common';
-
+import { Questionnaire } from 'src/questioneer/questioneer.entity';
 @Injectable()
 export class AssessmentService {
   constructor(
@@ -22,10 +22,17 @@ export class AssessmentService {
   }
 
   async findAll(query) {
-    return this.assessmentRepository.findAll(query as any);
+    // Assuming AssessmentRepository extends BaseRepository<Assessment>
+    const assessments = await this.assessmentRepository.findByJoin(
+      Questionnaire, // entity class, not string
+      'questionnaire',
+      'entity.id = questionnaire.assessmentId',
+      query
+    );
+    return assessments
   }
 
   async findById(id) {
-    return this.assessmentRepository.findById(id) 
+    return this.assessmentRepository.findById(id)
   }
 }

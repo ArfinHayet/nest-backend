@@ -59,6 +59,61 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
     });
   }
 
+
+  async findByJoin<J>(
+    joinEntity: { new(): J },       // entity class to join
+    joinAlias: string,               // alias for the join
+    joinCondition: string,           // e.g., 'entity.id = questionnaire.assessmentId'
+    filters?: FindOptionsWhere<T>,   // filters applied only on base entity
+    joinType: 'inner' | 'left' = 'left',
+  ): Promise<Array<T & { [key in typeof joinAlias]?: J }>> {  // <-- join optional
+    const qb = this.repo.createQueryBuilder('entity');
+
+    // Apply filters
+    if (filters) {
+      qb.where(filters);
+    }
+
+    // Select base entity columns
+    const mainCols = this.repo.metadata.columns.map(
+      col => `entity.${col.propertyName}`,
+    );
+    qb.select(mainCols);
+
+    // Add join
+    if (joinType === 'inner') {
+      qb.innerJoin(joinEntity, joinAlias, joinCondition);
+    } else {
+      qb.leftJoin(joinEntity, joinAlias, joinCondition);
+    }
+
+    // Select joined entity columns
+    const joinMeta = this.repo.manager.connection.getMetadata(joinEntity);
+    const joinCols = joinMeta.columns
+      .filter(col => col.propertyName !== 'password')
+      .map(col => `${joinAlias}.${col.propertyName}`);
+    qb.addSelect(joinCols);
+
+    // Use raw + entities to merge joined columns
+    const results = await qb.getRawAndEntities();
+
+    return results.entities.map((entity, index) => {
+      const raw = results.raw[index];
+      entity[joinAlias] = {} as J;
+
+      joinMeta.columns.forEach(col => {
+        const key = `${joinAlias}_${col.databaseName}`;
+        if (raw[key] !== undefined) {
+          entity[joinAlias][col.propertyName as keyof J] = raw[key];
+        }
+      });
+
+      return entity as T & { [key in typeof joinAlias]?: J };
+    });
+  }
+
+
+
   async create(data: DeepPartial<T>): Promise<T> {
     const entity = this.repo.create(data);
     try {
