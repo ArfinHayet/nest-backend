@@ -187,6 +187,45 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
    * Update the order of an item and shift other items accordingly
    */
 
+  /**
+ * Update an entity by ID
+ * @param id - ID of the entity to update
+ * @param data - Partial data to update
+ * @returns updated entity
+ */
+  async update(id: number, data: DeepPartial<T>): Promise<T> {
+    // find existing entity
+    const entity = await this.findById(id);
+    if (!entity) {
+      throw new BadRequestException(`Entity with id ${id} not found`);
+    }
+
+    // merge new data
+    const updatedEntity = this.repo.merge(entity, data);
+
+    try {
+      return await this.repo.save(updatedEntity);
+    } catch (error: any) {
+      // handle Postgres foreign key violation
+      if (error?.code === '23503' && error.detail) {
+        const match = error.detail.match(/\((.+)\)=/);
+        const column = match ? match[1] : null;
+        if (column) throw new BadRequestException(`${column} is invalid.`);
+        throw new BadRequestException('Invalid foreign key value.');
+      }
+
+      // handle unique constraint violation
+      if (error?.code === '23505' && error.detail) {
+        const match = error.detail.match(/\((.+)\)=/);
+        const column = match ? match[1] : 'value';
+        throw new BadRequestException(`${column} already exists.`);
+      }
+
+      // rethrow other errors
+      throw error;
+    }
+  }
+
 
 
 

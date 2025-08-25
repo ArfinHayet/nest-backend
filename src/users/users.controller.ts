@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { sendResponse } from 'src/utils/send-response';
 import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -48,6 +49,19 @@ export class UsersController {
   ) {
     const patient = await this.patientService.findPatientsByUser(userId);
     return sendResponse(patient, 'Patient retrieved successfully', 201)
+  }
+
+
+  // ✅ Update user endpoint
+  @Roles('admin')
+  @Put(':id')
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  async update(
+    @Param('id', ParseIntPipe) userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const updatedUser = await this.usersService.update(userId, updateUserDto);
+    return sendResponse(updatedUser, 'User updated successfully', 200);
   }
 
 }

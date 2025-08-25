@@ -3,6 +3,7 @@ import { QuestionnaireRepository } from './questionnaire.repository';
 import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
 import { UpdateQuestionnaireDto } from './dto/update-questionnaire.dto';
 import { Questionnaire } from '../questioneer/questioneer.entity';
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class QuestionnaireService {
@@ -23,5 +24,13 @@ export class QuestionnaireService {
 
   async findAll(query): Promise<Questionnaire[]> {
     return this.questionnaireRepository.findAll(query as any);  
+  }
+
+  async delete(id: number): Promise<void> {
+    const existing = await this.questionnaireRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundException(`Questionnaire with id ${id} not found`);
+    }
+    await this.questionnaireRepository.deleteById(id);
   }
 }

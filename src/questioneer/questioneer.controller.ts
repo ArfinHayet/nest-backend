@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Body, Put, Param, ParseIntPipe } from '@nestjs/common';
+import { Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { QuestionnaireService } from '../questioneer/questioneer.service';
 import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
@@ -40,11 +41,21 @@ export class QuestionnaireController {
 
 
   @Get()
-  @Roles('admin','user')
+  @Roles('admin', 'user')
   @ApiOperation({ summary: 'Get all questionnaires' })
   @ApiResponse({ status: 200, description: 'List of questionnaires', type: [Questionnaire] })
   async findAll(@Query() query: Record<string, any>) {
     const questions = await this.questionnaireService.findAll(query);
     return sendResponse(questions, 'questions retrieved successfully', 201)
+  }
+
+
+  @Delete(':id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Delete a questionnaire' })
+  @ApiResponse({ status: 200, description: 'Questionnaire deleted successfully' })
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    await this.questionnaireService.delete(id);
+    return sendResponse(null, `Questionnaire with id ${id} deleted successfully`, 200);
   }
 }

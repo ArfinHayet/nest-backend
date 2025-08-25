@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRepository } from './user.repository';
 import { omit } from "lodash"
+import { NotFoundException } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
@@ -35,5 +36,21 @@ export class UsersService {
     ])
 
     return user;
+  }
+
+
+  // ✅ New update method
+  async update(id: number, updateData: Partial<User>) {
+    // check if user exists
+    let user = await this.userRepo.findById(id);
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    // perform update
+    user = await this.userRepo.update(id, updateData);
+
+    // hide password before returning
+    return omit(user, ['password']);
   }
 }
