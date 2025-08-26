@@ -29,7 +29,7 @@ export class SubmissionController {
             throw new ConflictException(`Submission for assessmentId ${dto.assessmentId} already exists`);
         }
         // If not, create a new submission
-        return this.submissionService.create(dto);
+        return this.submissionService.create(dto);   
     }
 
 
