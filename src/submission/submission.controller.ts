@@ -29,8 +29,6 @@ export class SubmissionController {
         // --- scoring rules (same as frontend) ---
         const scoreIfAgree = new Set<number>([1, 7, 8, 10]);
         const scoreIfDisagree = new Set<number>([2, 3, 4, 5, 6, 9]);
-
-        console.log("got existing", existing)
         if (existing && existing.type === 'free') {
             let score = 0;
 
