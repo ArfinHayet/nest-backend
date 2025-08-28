@@ -28,6 +28,7 @@ export class CreateSubmissionDto {
   @ApiProperty({
     description: 'Score achieved in the assessment',
     example: 85,
+    required:false
   })
   @IsInt()
   score: number;

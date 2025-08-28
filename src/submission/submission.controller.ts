@@ -20,17 +20,48 @@ export class SubmissionController {
     constructor(private readonly submissionService: SubmissionService, private readonly assessmentService: AssessmentService) { }
 
     @Post()
-    @Roles('admin','user')
+    @Roles('admin', 'user')
     @ApiOperation({ summary: 'Create a new submission' })
     @ApiResponse({ status: 201, description: 'Submission created', type: Submission })
-    async create(@Body() dto: CreateSubmissionDto): Promise<Submission> {
-        // const existing = await this.submissionService.findByAssessment(dto.assessmentId);
-        // if (existing) {
-        //     throw new ConflictException(`Submission for assessmentId ${dto.assessmentId} already exists`);
-        // }
-        // If not, create a new submission
-        return this.submissionService.create(dto);   
+    async create(@Body() dto: any): Promise<Submission> {
+        const existing = await this.assessmentService.findById(dto.assessmentId);
+
+        // --- scoring rules (same as frontend) ---
+        const scoreIfAgree = new Set<number>([1, 7, 8, 10]);
+        const scoreIfDisagree = new Set<number>([2, 3, 4, 5, 6, 9]);
+
+        console.log("got existing", existing)
+        if (existing && existing.type === 'free') {
+            let score = 0;
+
+            for (let i = 0; i < dto.answers.length; i++) {
+                const qNum = i + 1; // relative index (1–10)
+                const answerText = dto.answers[i].answer;
+
+                if (
+                    scoreIfAgree.has(qNum) &&
+                    (answerText === 'Definitely agree' || answerText === 'Slightly agree')
+                ) {
+                    score++;
+                }
+
+                if (
+                    scoreIfDisagree.has(qNum) &&
+                    (answerText === 'Definitely disagree' || answerText === 'Slightly disagree')
+                ) {
+                    score++;
+                }
+            }
+
+
+            dto.score = score; // assign calculated score
+        }
+
+        console.log(dto.score)
+        // Save the submission
+        return this.submissionService.create(dto);
     }
+
 
 
 
@@ -39,7 +70,7 @@ export class SubmissionController {
     @ApiOperation({ summary: 'Get all submissions' })
     @ApiResponse({ status: 200, description: 'List of submissions', type: [Submission] })
     async findAll(@Query() query: Record<string, any>) {
-        const submissions = await this.submissionService.findAll(query,true);
+        const submissions = await this.submissionService.findAll(query, true);
         return sendResponse(submissions, 'Submissions retrieved successfully', 200);
     }
 }

@@ -33,7 +33,7 @@ export class SubmissionService {
       }
 
       return submission;
-    });
+    });   
   }
 
 
@@ -41,7 +41,7 @@ export class SubmissionService {
     return this.submissionRepository.findAll(query as any, includeRelations);
   }
 
-  async findByAssessment(id) {
+  async findByAssessment(id):Promise<any> {
     return this.submissionRepository.findByField('assessmentId', id)
   }
 }

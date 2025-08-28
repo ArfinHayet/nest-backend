@@ -36,7 +36,7 @@ export class Submission {
   @Column()
   userId: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   score: number;
 
   @Column({ type: 'text', nullable: true })
