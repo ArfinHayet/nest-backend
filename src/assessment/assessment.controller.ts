@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Body } from '@nestjs/common';
+import { Delete, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AssessmentService } from './assessment.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
@@ -9,6 +10,7 @@ import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Query } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
 
 @UseGuards(AuthGuard('jwt'),RolesGuard)
@@ -34,4 +36,14 @@ export class AssessmentController {
     const assessments = await this.assessmentService.findAll(query); 
     return sendResponse(assessments,'assessments retrieved successfully',200)
   }   
+
+  @Delete(':id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Delete an assessment by ID' })
+  @ApiResponse({ status: 200, description: 'Assessment deleted successfully' })
+  @ApiResponse({ status: 404, description: 'Assessment not found' })
+  async delete(@Param('id') id: number) {
+    await this.assessmentService.delete(id);
+    return sendResponse(null, 'Assessment deleted successfully', 200);
+  }
 }

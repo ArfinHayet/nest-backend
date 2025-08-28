@@ -35,4 +35,9 @@ export class AssessmentService {
   async findById(id) {
     return this.assessmentRepository.findById(id)
   }
+
+  async delete(id: number): Promise<void> {
+   return this.assessmentRepository.deleteById(id);
+  }
+
 }

@@ -24,10 +24,10 @@ export class SubmissionController {
     @ApiOperation({ summary: 'Create a new submission' })
     @ApiResponse({ status: 201, description: 'Submission created', type: Submission })
     async create(@Body() dto: CreateSubmissionDto): Promise<Submission> {
-        const existing = await this.submissionService.findByAssessment(dto.assessmentId);
-        if (existing) {
-            throw new ConflictException(`Submission for assessmentId ${dto.assessmentId} already exists`);
-        }
+        // const existing = await this.submissionService.findByAssessment(dto.assessmentId);
+        // if (existing) {
+        //     throw new ConflictException(`Submission for assessmentId ${dto.assessmentId} already exists`);
+        // }
         // If not, create a new submission
         return this.submissionService.create(dto);   
     }
