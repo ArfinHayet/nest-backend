@@ -5,11 +5,13 @@ import { SubmissionService } from './submission.service';
 import { SubmissionRepository } from './entity/submission.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AssessmentModule } from 'src/assessment/assessment.module';
+import { AiSummeryModule } from 'src/ai-summery/ai-summery.module';
+import { QuestioneerModule } from 'src/questioneer/questioneer.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Submission]),AssessmentModule],
+  imports: [TypeOrmModule.forFeature([Submission]),AssessmentModule, AiSummeryModule, QuestioneerModule],
   controllers: [SubmissionController],
   exports: [SubmissionService, SubmissionRepository], 
-  providers: [SubmissionService, SubmissionRepository]
+  providers: [SubmissionService, SubmissionRepository, AiSummeryModule,QuestioneerModule]
 })
 export class SubmissionModule {}

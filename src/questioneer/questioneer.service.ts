@@ -26,6 +26,10 @@ export class QuestionnaireService {
     return this.questionnaireRepository.findAll(query as any);  
   }
 
+  async findById(query): Promise<Questionnaire> {
+    return this.questionnaireRepository.findById(query as any)
+  }
+
   async delete(id: number): Promise<void> {
     const existing = await this.questionnaireRepository.findById(id);
     if (!existing) {

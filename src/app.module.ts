@@ -11,6 +11,7 @@ import { AssessmentModule } from './assessment/assessment.module';
 import { QuestioneerModule } from './questioneer/questioneer.module';
 import { SubmissionModule } from './submission/submission.module';
 import { PaymentModule } from './payment/payment.module';
+import { AiSummeryModule } from './ai-summery/ai-summery.module';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { PaymentModule } from './payment/payment.module';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule
   ],
   controllers: [AppController],
   providers: [AppService]
