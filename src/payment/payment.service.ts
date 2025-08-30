@@ -94,4 +94,35 @@ export class PaymentService {
 
     return result;
   }
+
+
+
+    /**
+   * Fetch product details by priceId
+   */
+  async getProductByPriceId(priceId: string) {
+    try {
+      // 1️⃣ Get price object
+      const price = await this.stripe.prices.retrieve(priceId);
+
+      if (!price || typeof price.product !== 'string') {
+        throw new Error('Invalid priceId or product not found');
+      }
+
+      // 2️⃣ Get product details from price.product
+      const product = await this.stripe.products.retrieve(price.product);
+
+      return {
+        productId: product.id,
+        name: product.name,
+        description: product.description,
+        currency: price.currency,
+        unit_amount: price.unit_amount,
+      };
+    } catch (error) {
+      console.error('Error fetching product by priceId:', error.message);
+      throw error;
+    }
+  }
+
 }

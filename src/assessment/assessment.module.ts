@@ -3,10 +3,11 @@ import { Assessment } from './assessment.entity';
 import { AssessmentController } from './assessment.controller';
 import { AssessmentService } from './assessment.service'; 
 import { AssessmentRepository } from './assessment.repository';
+import { PaymentModule } from 'src/payment/payment.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Assessment])],
+  imports: [TypeOrmModule.forFeature([Assessment]),PaymentModule],
   controllers: [AssessmentController],
   exports: [AssessmentService, AssessmentRepository], 
   providers: [AssessmentService, AssessmentRepository]
