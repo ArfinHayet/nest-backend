@@ -44,6 +44,10 @@ export class PaymentService {
     return { url: session.url };
   }
 
+  async getAllPayment():Promise<Payment[]> {
+    return this.paymentSessionRepo.findAll()
+  }
+
   // Save payment after webhook
   async createPayment(data: {
     priceId: string;

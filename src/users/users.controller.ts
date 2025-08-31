@@ -53,7 +53,7 @@ export class UsersController {
 
 
   // ✅ Update user endpoint
-  @Roles('admin')
+  @Roles('admin','user')
   @Put(':id')
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async update(

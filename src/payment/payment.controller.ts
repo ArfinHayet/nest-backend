@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { Roles } from 'src/auth/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { sendResponse } from 'src/utils/send-response';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('payment')
@@ -75,6 +76,14 @@ export class PaymentController {
   @Get('products')
   getAllProducts() {
     return this.paymentService.getAllProducts();
+  }
+
+
+  @Roles('admin','user')
+  @Get('')
+  async getAllPayments() {
+    const paymentList = await this.paymentService.getAllPayment() 
+    return sendResponse(paymentList, 'Payment List created successfully', 201);
   }
 
   // ✅ Success page route

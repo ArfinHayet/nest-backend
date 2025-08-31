@@ -17,6 +17,10 @@ export class PatientService {
     return this.patientRepository.findAll(query as any)
   }
 
+  async update(id: number, data: Partial<CreatePatientDto>) {
+    return this.patientRepository.update(id,data)
+  }
+
   async findPatientsByUser(userId: number) {
   return this.patientRepository.findByField('user', { id: userId } as any);
 }
