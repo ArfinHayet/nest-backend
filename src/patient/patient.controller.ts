@@ -30,6 +30,12 @@ export class PatientController {
   @ApiResponse({ status: 200, description: 'List of patients', type: [Patient] })
   async findAll(@Query() query: Record<string, any>) {
     const patient = await this.patientService.findAll(query);
+
+    if(patient){
+       await Promise.all(patient.map(async (p) => {
+          
+      }));
+    }
     return sendResponse(patient, 'Patient retrieved successfully', 200);
   }
 

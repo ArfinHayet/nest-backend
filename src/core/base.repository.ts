@@ -8,22 +8,36 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
 
 
   async findAll(
-    filters?: FindOptionsWhere<T>,
+    filters?: FindOptionsWhere<T> & { page?: number; limit?: number },
     includeRelations = false,
   ): Promise<any[]> {
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 10;
+
+    // Remove page and limit from filters before using in where
+    const whereFilters = { ...filters };
+    delete whereFilters.page;
+    delete whereFilters.limit;
+
     if (!includeRelations) {
-      return this.repo.find({ where: filters });
+      return this.repo.find({
+        where: whereFilters,
+        skip: (page - 1) * limit,
+        take: limit,
+      });
     }
 
     const qb = this.repo.createQueryBuilder('entity');
 
     // Apply filters if provided
-    if (filters) {
-      qb.where(filters);
+    if (Object.keys(whereFilters).length > 0) {
+      qb.where(whereFilters);
     }
 
     // Always select main entity columns
-    const mainCols = this.repo.metadata.columns.map(col => `entity.${col.propertyName}`);
+    const mainCols = this.repo.metadata.columns.map(
+      col => `entity.${col.propertyName}`
+    );
     qb.select(mainCols);
 
     // Include relations dynamically
@@ -35,13 +49,16 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
         .filter(col => col.propertyName !== 'password')
         .map(col => `${relName}.${col.propertyName}`);
 
-      qb.leftJoin(`entity.${relName}`, relName)
-        .addSelect(relCols);
+      qb.leftJoin(`entity.${relName}`, relName).addSelect(relCols);
     });
+
+    // Apply pagination
+    qb.skip((page - 1) * limit).take(limit);
 
     const results = await qb.getMany();
     return JSON.parse(JSON.stringify(results));
   }
+
 
 
 
