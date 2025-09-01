@@ -25,11 +25,11 @@ export class AssessmentController {
   @ApiResponse({ status: 201, description: 'Assessment created', type: Assessment })
   async create(@Body() dto: CreateAssessmentDto) {
     const assessment = await this.assessmentService.create(dto);
-    return sendResponse(assessment,'assessment created successfully',201) 
+    return sendResponse(assessment,'assessment created successfully',201)  
   }
  
   @Get() 
-  @Roles('admin','user')
+  @Roles('admin','user','clinician')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findAll(@Query() query: Record<string, any>) {
@@ -49,7 +49,7 @@ export class AssessmentController {
 
 
   @Get('count') 
-  @Roles('admin','user')
+  @Roles('admin','user','clinician')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findCount(@Query() query: Record<string, any>) {

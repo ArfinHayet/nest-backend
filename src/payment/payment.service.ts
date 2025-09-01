@@ -44,7 +44,7 @@ export class PaymentService {
     return { url: session.url };
   }
 
-  async getAllPayment():Promise<Payment[]> {
+  async getAllPayment(): Promise<Payment[]> {
     return this.paymentSessionRepo.findAll()
   }
 
@@ -62,7 +62,7 @@ export class PaymentService {
 
   // ✅ Update payment session status
   async updatePaymentSessionStatus(sessionId: string, status: string) {
-    const session = await this.paymentSessionRepo.findByField('sessionId',sessionId);
+    const session = await this.paymentSessionRepo.findByField('sessionId', sessionId);
     if (session) {
       session.paymentStatus = status;
       return this.paymentSessionRepo.create(session);
@@ -100,10 +100,23 @@ export class PaymentService {
   }
 
 
+  async getPriceById(priceId: string) {
+    const price = await this.stripe.prices.retrieve(priceId);
 
-    /**
-   * Fetch product details by priceId
-   */
+    return {
+      priceId: price.id,
+      currency: price.currency,
+      unit_amount: price.unit_amount,
+      productId: price.product,
+    };
+  }
+
+
+
+
+  /**
+ * Fetch product details by priceId
+ */
   async getProductByPriceId(priceId: string) {
     try {
       // 1️⃣ Get price object

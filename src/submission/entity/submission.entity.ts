@@ -53,4 +53,8 @@ export class Submission {
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+
+  @Column({ type: 'text', nullable: true })
+  paidAmount: string;
 }

@@ -12,13 +12,7 @@ export class SubmissionService {
   async create(dto: CreateSubmissionDto): Promise<Submission> {
     return await this.dataSource.transaction(async (manager) => {
       // Step 1: create & save submission
-      const submission = manager.create(Submission, {
-        patientId: dto.patientId,
-        assessmentId: dto.assessmentId,
-        userId: dto.userId,
-        score: dto.score,
-        summary: dto.summary,
-      });
+      const submission = manager.create(Submission, dto);
       await manager.save(submission);
 
       // Step 2: bulk insert answers (if provided)

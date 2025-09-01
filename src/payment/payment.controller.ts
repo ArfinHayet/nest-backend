@@ -79,7 +79,7 @@ export class PaymentController {
   }
 
 
-  @Roles('admin','user')
+  @Roles('admin','user','clinician')
   @Get('')
   async getAllPayments() {
     const paymentList = await this.paymentService.getAllPayment() 
