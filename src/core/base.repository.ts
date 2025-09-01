@@ -103,6 +103,16 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
   }
 
 
+    async findAllByField<K extends keyof T>(
+    field: K,
+    value: T[K],
+  ): Promise<T[] | null> {
+    return this.repo.find({
+      where: { [field]: value } as any,
+    });
+  }
+
+
   async findByJoin<J>(
     joinEntity: { new(): J },       // entity class to join
     joinAlias: string,              // alias for the join

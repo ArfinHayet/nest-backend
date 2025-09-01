@@ -8,12 +8,14 @@ import { AuthGuard } from '@nestjs/passport';
 import { UseGuards } from '@nestjs/common';
 import { Roles } from 'src/auth/roles.decorator';
 import { Query } from '@nestjs/common';
+import { AssessmentService } from 'src/assessment/assessment.service';
+import { SubmissionService } from 'src/submission/submission.service';
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Patients')
 @Controller('patient')
 export class PatientController {
-  constructor(private readonly patientService: PatientService) {}
+  constructor(private readonly patientService: PatientService, private readonly submissionService: SubmissionService) { }
 
   @Post()
   @Roles('admin', 'user')
@@ -29,14 +31,24 @@ export class PatientController {
   @ApiOperation({ summary: 'Get all patients' })
   @ApiResponse({ status: 200, description: 'List of patients', type: [Patient] })
   async findAll(@Query() query: Record<string, any>) {
-    const patient = await this.patientService.findAll(query);
+    const patients = await this.patientService.findAll(query);
 
-    if(patient){
-       await Promise.all(patient.map(async (p) => {
-          
-      }));
+    if (!patients || patients.length === 0) {
+      return sendResponse([], 'No patients found', 200);
     }
-    return sendResponse(patient, 'Patient retrieved successfully', 200);
+
+    const result = await Promise.all(
+      patients.map(async (patient) => {
+        const assessments = await this.submissionService.findByPatientId(patient.id);
+        console.log('assessments', assessments);
+        return {
+          ...patient, // spread existing patient properties
+          assessments: assessments || [], // attach assessments safely
+        };
+      }),
+    );
+
+    return sendResponse(result, 'Patients retrieved successfully', 200);
   }
 
   @Put(':id')

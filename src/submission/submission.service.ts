@@ -39,6 +39,10 @@ export class SubmissionService {
     return this.submissionRepository.findByField('assessmentId', id)
   }
 
+  async findByPatientId(id):Promise<any> {
+    return this.submissionRepository.findAllByField('patientId', id)
+  }
+
   async updateAssessment(id, dto: Partial<CreateSubmissionDto>): Promise<Submission> {
     const submission = await this.submissionRepository.findById(id)
     if (!submission) {
