@@ -14,37 +14,65 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
     const page = filters?.page ?? 1;
     const limit = filters?.limit ?? 10;
 
-    // Remove page and limit from filters before using in where
-    const whereFilters = { ...filters };
+    // Remove pagination params
+    const whereFilters: Record<string, any> = { ...filters };
     delete whereFilters.page;
     delete whereFilters.limit;
 
+    // If relations are not required, handle simple case
     if (!includeRelations) {
-      return this.repo.find({
-        where: whereFilters,
-        skip: (page - 1) * limit,
-        take: limit,
+      const qb = this.repo.createQueryBuilder('entity');
+
+      // Apply filters
+      Object.entries(whereFilters).forEach(([field, value], i) => {
+        if (typeof value === 'string' && value.startsWith(':between')) {
+          const match = value.match(/\[([^\]]+)\]/);
+          if (match) {
+            const [start, end] = match[1].split(',');
+            qb.andWhere(`entity.${field} BETWEEN :start${i} AND :end${i}`, {
+              [`start${i}`]: start.trim(),
+              [`end${i}`]: end.trim(),
+            });
+          }
+        } else {
+          qb.andWhere(`entity.${field} = :val${i}`, { [`val${i}`]: value });
+        }
       });
+
+      qb.skip((page - 1) * limit).take(limit);
+
+      return qb.getMany();
     }
 
+    // Case: include relations
     const qb = this.repo.createQueryBuilder('entity');
 
-    // Apply filters if provided
-    if (Object.keys(whereFilters).length > 0) {
-      qb.where(whereFilters);
-    }
+    // Apply filters
+    Object.entries(whereFilters).forEach(([field, value], i) => {
+      if (typeof value === 'string' && value.startsWith(':between')) {
+        const match = value.match(/\[([^\]]+)\]/);
+        if (match) {
+          const [start, end] = match[1].split(',');
+          qb.andWhere(`entity.${field} BETWEEN :start${i} AND :end${i}`, {
+            [`start${i}`]: start.trim(),
+            [`end${i}`]: end.trim(),
+          });
+        }
+      } else {
+        qb.andWhere(`entity.${field} = :val${i}`, { [`val${i}`]: value });
+      }
+    });
 
-    // Always select main entity columns
+    // Select main entity columns
     const mainCols = this.repo.metadata.columns.map(
       col => `entity.${col.propertyName}`
     );
     qb.select(mainCols);
 
-    // Include relations dynamically
+    // Join relations dynamically
     this.repo.metadata.relations.forEach(relation => {
       const relName = relation.propertyName;
 
-      // Select only non-password columns from the relation
       const relCols = relation.inverseEntityMetadata.columns
         .filter(col => col.propertyName !== 'password')
         .map(col => `${relName}.${col.propertyName}`);
@@ -52,14 +80,12 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
       qb.leftJoin(`entity.${relName}`, relName).addSelect(relCols);
     });
 
-    // Apply pagination
+    // Pagination
     qb.skip((page - 1) * limit).take(limit);
 
     const results = await qb.getMany();
     return JSON.parse(JSON.stringify(results));
   }
-
-
 
 
 
@@ -79,16 +105,31 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
 
   async findByJoin<J>(
     joinEntity: { new(): J },       // entity class to join
-    joinAlias: string,               // alias for the join
-    joinCondition: string,           // e.g., 'entity.id = questionnaire.assessmentId'
-    filters?: FindOptionsWhere<T>,   // filters applied only on base entity
+    joinAlias: string,              // alias for the join
+    joinCondition: string,          // e.g., 'entity.id = questionnaire.assessmentId'
+    filters?: Record<string, any>,  // allow string-based expressions
     joinType: 'inner' | 'left' = 'left',
-  ): Promise<Array<T & { [key in typeof joinAlias]?: J }>> {  // <-- join optional
+  ): Promise<Array<T & { [key in typeof joinAlias]?: J }>> {
     const qb = this.repo.createQueryBuilder('entity');
 
     // Apply filters
     if (filters) {
-      qb.where(filters);
+      Object.entries(filters).forEach(([field, value], i) => {
+        // Example: createdAt=:between[2025-08-31,2025-09-01]
+        if (typeof value === 'string' && value.startsWith(':between')) {
+          const match = value.match(/\[([^\]]+)\]/);
+          if (match) {
+            const [start, end] = match[1].split(',');
+            qb.andWhere(`entity.${field} BETWEEN :start${i} AND :end${i}`, {
+              [`start${i}`]: start.trim(),
+              [`end${i}`]: end.trim(),
+            });
+          }
+        } else {
+          // Normal equality
+          qb.andWhere(`entity.${field} = :val${i}`, { [`val${i}`]: value });
+        }
+      });
     }
 
     // Select base entity columns
@@ -104,7 +145,7 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
       qb.leftJoin(joinEntity, joinAlias, joinCondition);
     }
 
-    // Select joined entity columns
+    // Select joined entity columns 
     const joinMeta = this.repo.manager.connection.getMetadata(joinEntity);
     const joinCols = joinMeta.columns
       .filter(col => col.propertyName !== 'password')
@@ -241,6 +282,44 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
       // rethrow other errors
       throw error;
     }
+  }
+
+
+
+  async findCount(
+    filters?: FindOptionsWhere<T>,
+    includeRelations = false,
+  ): Promise<number> {
+    const whereFilters: Record<string, any> = { ...filters };
+
+    const qb = this.repo.createQueryBuilder('entity');
+
+    // Apply filters (supports :between)
+    Object.entries(whereFilters).forEach(([field, value], i) => {
+      if (typeof value === 'string' && value.startsWith(':between')) {
+        const match = value.match(/\[([^\]]+)\]/);
+        if (match) {
+          const [start, end] = match[1].split(',');
+          qb.andWhere(`entity.${field} BETWEEN :start${i} AND :end${i}`, {
+            [`start${i}`]: start.trim(),
+            [`end${i}`]: end.trim(),
+          });
+        }
+      } else {
+        qb.andWhere(`entity.${field} = :val${i}`, { [`val${i}`]: value });
+      }
+    });
+
+    // Include relations if needed (mainly for where conditions on relations later)
+    if (includeRelations) {
+      this.repo.metadata.relations.forEach(relation => {
+        const relName = relation.propertyName;
+        qb.leftJoin(`entity.${relName}`, relName);
+      });
+    }
+
+    // Return count only
+    return qb.getCount();
   }
 
 

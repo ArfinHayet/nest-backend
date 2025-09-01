@@ -56,7 +56,10 @@ export class AssessmentService {
     return enriched;
   }
 
-
+  
+  async findCount(query){
+    return this.assessmentRepository.findCount(query);
+  }
 
   async findById(id: number) {
     return this.assessmentRepository.findById(id)

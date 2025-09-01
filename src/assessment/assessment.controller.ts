@@ -46,4 +46,14 @@ export class AssessmentController {
     await this.assessmentService.delete(id);
     return sendResponse(null, 'Assessment deleted successfully', 200);
   }
+
+
+  @Get('count') 
+  @Roles('admin','user')
+  @ApiOperation({ summary: 'Get all assessments' })
+  @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
+  async findCount(@Query() query: Record<string, any>) {
+    const assessments = await this.assessmentService.findCount(query);
+    return sendResponse(assessments,'assessment count retrieved successfully',200)
+  }   
 }
