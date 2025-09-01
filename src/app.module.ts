@@ -15,6 +15,7 @@ import { AiSummeryModule } from './ai-summery/ai-summery.module';
 import { PrescriptionModule } from './prescription/prescription.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { LeaveModule } from './leave/leave.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { LeaveModule } from './leave/leave.module';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule
   ],
   controllers: [AppController],
   providers: [AppService]
