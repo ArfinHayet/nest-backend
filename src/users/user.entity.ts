@@ -2,6 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -40,11 +41,22 @@ export class User {
   @Column()
   knowHow: string;
 
-    // Hash password before inserting
+  @Column({ nullable: true })
+  hcpcTitle: string;
+
+  @Column({ nullable: true })
+  regNo: string;   // ✅ HCPC Registration Number
+
+  @Column({ nullable: true })
+  practiceName: string; // ✅ Practice Name
+
+  @Column({ nullable: true })
+  certification: string; // ✅ Certification file path or URL
+
+  // Hash password before inserting/updating
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
-    // Only hash if password was changed (important for updates)
     if (this.password && !this.password.startsWith('$2b$')) {
       const salt = await bcrypt.genSalt(10);
       this.password = await bcrypt.hash(this.password, salt);

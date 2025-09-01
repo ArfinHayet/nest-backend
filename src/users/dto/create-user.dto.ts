@@ -61,7 +61,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   street: string;
 
-  @ApiProperty({ example: 'user', description: 'Role of the user (e.g., user, admin)' })
+  @ApiProperty({ example: 'user', description: 'Role of the user (e.g., user, admin, clinician)' })
   @IsString()
   @IsNotEmpty()
   role: string;
@@ -80,4 +80,25 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   identifier: string; // email or phone
+
+  // ✅ Optional extra fields
+  @ApiProperty({ example: 'HCPC Title', required: false })
+  @IsString()
+  @IsOptional()
+  hcpcTitle?: string;
+
+  @ApiProperty({ example: 'REG12345', required: false })
+  @IsString()
+  @IsOptional()
+  regNo?: string;
+
+  @ApiProperty({ example: 'My Practice Name', required: false })
+  @IsString()
+  @IsOptional()
+  practiceName?: string;
+
+  @ApiProperty({ example: 'certification.pdf', required: false })
+  @IsString()
+  @IsOptional()
+  certification?: string; // file path or URL
 }

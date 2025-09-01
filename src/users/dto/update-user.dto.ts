@@ -81,4 +81,25 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   identifier?: string; // email or phone
+
+  // ✅ Optional extra fields
+  @ApiProperty({ example: 'HCPC Title', required: false })
+  @IsString()
+  @IsOptional()
+  hcpcTitle?: string;
+
+  @ApiProperty({ example: 'REG12345', required: false })
+  @IsString()
+  @IsOptional()
+  regNo?: string;
+
+  @ApiProperty({ example: 'My Practice Name', required: false })
+  @IsString()
+  @IsOptional()
+  practiceName?: string;
+
+  @ApiProperty({ example: 'certification.pdf', required: false })
+  @IsString()
+  @IsOptional()
+  certification?: string; // file path or URL
 }

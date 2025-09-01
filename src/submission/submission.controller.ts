@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Patch, Param, Put } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SubmissionService } from './submission.service';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
@@ -9,8 +9,6 @@ import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { AssessmentService } from 'src/assessment/assessment.service';
-import { ConflictException } from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 import { QuestionnaireService } from 'src/questioneer/questioneer.service';
 import { AiSummaryService } from 'src/ai-summery/ai-summery.service';
@@ -19,11 +17,12 @@ import { AiSummaryService } from 'src/ai-summery/ai-summery.service';
 @ApiTags('Submissions')
 @Controller('submissions')
 export class SubmissionController {
-    constructor(private readonly submissionService: SubmissionService,
+    constructor(
+        private readonly submissionService: SubmissionService,
         private readonly assessmentService: AssessmentService,
         private readonly questionService: QuestionnaireService,
         private readonly aiSummery: AiSummaryService
-    ) { }
+    ) {}
 
     @Post()
     @Roles('admin', 'user')
@@ -38,7 +37,6 @@ export class SubmissionController {
 
         if (existing && existing.type === 'free') {
             let score = 0;
-
             for (let i = 0; i < dto.answers.length; i++) {
                 const qNum = i + 1;
                 const answerText = dto.answers[i].answer;
@@ -57,11 +55,10 @@ export class SubmissionController {
                     score++;
                 }
             }
-
             dto.score = score;
         }
 
-        if (dto.answers?.length > 0) {
+        if (dto.answers?.length > 0 && existing.type === 'premium') {
             const dataSet = [];
             for (const ans of dto.answers) {
                 const questionData = await this.questionService.findById(ans.questionId);
@@ -75,15 +72,31 @@ export class SubmissionController {
 
             // generate summary
             const summary = await this.aiSummery.summarizeAll(dataSet);
-            dto.summary = summary; // ✅ use consistent spelling
+            dto.summary = summary;
         }
 
+        // --- Set default values for new fields ---
+        dto.status = 'pending';
+        dto.ratings = 0;
+        dto.additionalInfo = '';
         return this.submissionService.create(dto);
     }
 
-
-
-
+    @Put(':id')
+    @Roles('admin', 'user')
+    @ApiOperation({ summary: 'Update an existing submission' })
+    @ApiResponse({ status: 200, description: 'Submission updated', type: Submission })
+    async update(
+        @Param('id') id: number,
+        @Body() dto: Partial<CreateSubmissionDto>
+    ): Promise<Submission> {
+        try {
+            const updated = await this.submissionService.updateAssessment(id, dto);
+            return updated;
+        } catch (err) {
+            throw new BadRequestException(err.message || 'Failed to update submission');
+        }
+    }
 
     @Get()
     @Roles('admin', 'user')

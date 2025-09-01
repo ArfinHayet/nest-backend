@@ -44,4 +44,13 @@ export class SubmissionService {
   async findByAssessment(id):Promise<any> {
     return this.submissionRepository.findByField('assessmentId', id)
   }
+
+  async updateAssessment(id, dto: Partial<CreateSubmissionDto>): Promise<Submission> {
+    const submission = await this.submissionRepository.findById(id)
+    if (!submission) {
+      throw new BadRequestException('Submission not found');
+    } 
+    Object.assign(submission, dto);
+    return this.submissionRepository.create(submission)
+  } 
 }

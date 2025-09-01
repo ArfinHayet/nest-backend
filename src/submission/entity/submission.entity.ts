@@ -1,4 +1,4 @@
- import {
+import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
@@ -41,6 +41,15 @@ export class Submission {
 
   @Column({ type: 'text', nullable: true })
   summary: string;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  status: string; // new field: e.g., 'pending', 'completed'
+
+  @Column({ type: 'float', nullable: true })
+  ratings: number; // new field: numeric rating
+
+  @Column({ type: 'text', nullable: true })
+  additionalInfo: string; // new field: extra notes
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
