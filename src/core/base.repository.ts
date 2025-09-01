@@ -110,12 +110,19 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
     filters?: Record<string, any>,  // allow string-based expressions
     joinType: 'inner' | 'left' = 'left',
   ): Promise<Array<T & { [key in typeof joinAlias]?: J }>> {
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 10;
+
+    // Remove pagination keys
+    const whereFilters: Record<string, any> = { ...filters };
+    delete whereFilters.page;
+    delete whereFilters.limit;
+
     const qb = this.repo.createQueryBuilder('entity');
 
     // Apply filters
-    if (filters) {
-      Object.entries(filters).forEach(([field, value], i) => {
-        // Example: createdAt=:between[2025-08-31,2025-09-01]
+    if (whereFilters) {
+      Object.entries(whereFilters).forEach(([field, value], i) => {
         if (typeof value === 'string' && value.startsWith(':between')) {
           const match = value.match(/\[([^\]]+)\]/);
           if (match) {
@@ -126,7 +133,6 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
             });
           }
         } else {
-          // Normal equality
           qb.andWhere(`entity.${field} = :val${i}`, { [`val${i}`]: value });
         }
       });
@@ -152,6 +158,9 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
       .map(col => `${joinAlias}.${col.propertyName}`);
     qb.addSelect(joinCols);
 
+    // ✅ Apply pagination
+    qb.skip((page - 1) * limit).take(limit);
+
     // Use raw + entities to merge joined columns
     const results = await qb.getRawAndEntities();
 
@@ -169,6 +178,7 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
       return entity as T & { [key in typeof joinAlias]?: J };
     });
   }
+
 
 
 
