@@ -24,16 +24,14 @@ export class SubmissionController {
         private readonly questionService: QuestionnaireService,
         private readonly aiSummery: AiSummaryService,
         private readonly paymentService: PaymentService
-    ) {}
+    ) { }
 
     @Post()
-    @Roles('admin', 'user','clinician')
+    @Roles('admin', 'user', 'clinician')
     @ApiOperation({ summary: 'Create a new submission' })
     @ApiResponse({ status: 201, description: 'Submission created', type: Submission })
     async create(@Body() dto: any): Promise<Submission> {
         const existing = await this.assessmentService.findById(dto.assessmentId);
-        const priceInfo = await this.paymentService.getPriceById(existing.priceId);
-        dto.paidAmount = priceInfo ? priceInfo.unit_amount.toString() : '0';
         if (!existing) {
             throw new BadRequestException('Invalid assessmentId');
         }
@@ -76,11 +74,13 @@ export class SubmissionController {
                 }
             }
 
+            const priceInfo = await this.paymentService.getPriceById(existing.priceId);
+            dto.paidAmount = priceInfo ? priceInfo.unit_amount.toString() : '0';
             // generate summary
             const summary = await this.aiSummery.summarizeAll(dataSet);
             dto.summary = summary;
         }
-        
+
 
         // --- Set default values for new fields ---
         dto.status = 'pending';
@@ -90,7 +90,7 @@ export class SubmissionController {
     }
 
     @Put(':id')
-    @Roles('admin', 'user','clinician')
+    @Roles('admin', 'user', 'clinician')
     @ApiOperation({ summary: 'Update an existing submission' })
     @ApiResponse({ status: 200, description: 'Submission updated', type: Submission })
     async update(
@@ -106,7 +106,7 @@ export class SubmissionController {
     }
 
     @Get()
-    @Roles('admin', 'user','clinician')
+    @Roles('admin', 'user', 'clinician')
     @ApiOperation({ summary: 'Get all submissions' })
     @ApiResponse({ status: 200, description: 'List of submissions', type: [Submission] })
     async findAll(@Query() query: Record<string, any>) {
