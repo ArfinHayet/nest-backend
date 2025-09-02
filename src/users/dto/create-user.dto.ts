@@ -36,6 +36,7 @@ export class CreateUserDto {
   phone?: string;
 
   @ApiProperty({ example: 30, minimum: 0, maximum: 150 })
+  @IsOptional()
   @IsInt()
   @Min(0)
   @Max(150)
@@ -43,22 +44,22 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'Bangladesh' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   country: string;
 
   @ApiProperty({ example: 'Chattogram' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   state: string;
 
   @ApiProperty({ example: '4000' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   postCode: string;
 
   @ApiProperty({ example: '123 Main Street' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   street: string;
 
   @ApiProperty({ example: 'user', description: 'Role of the user (e.g., user, admin, clinician)' })
@@ -68,7 +69,7 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'Facebook', description: 'How the user came to know about the app' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   knowHow: string;
 
   @ApiProperty({ example: '123456', description: 'One Time Password sent to user' })
