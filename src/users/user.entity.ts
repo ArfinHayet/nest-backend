@@ -20,25 +20,25 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
-  @Column()
+  @Column({nullable: true})
   age: number;
 
-  @Column()
+  @Column({nullable: true})
   country: string;
 
-  @Column()
+  @Column({nullable: true})
   state: string;
 
-  @Column()
+  @Column({nullable: true})
   postCode: string;
 
-  @Column()
+  @Column({nullable: true})
   street: string;
 
   @Column()
   role: string;
 
-  @Column()
+  @Column({nullable: true})
   knowHow: string;
 
   @Column({ nullable: true })
