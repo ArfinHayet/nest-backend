@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Headers, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Headers, Req, Res, UseGuards, Query } from '@nestjs/common';
 import { join } from 'path';
 import { PaymentService } from './payment.service';
 import { Request, Response } from 'express';
@@ -81,9 +81,9 @@ export class PaymentController {
 
   @Roles('admin','user','clinician')
   @Get('')
-  async getAllPayments() {
-    const paymentList = await this.paymentService.getAllPayment() 
-    return sendResponse(paymentList, 'Payment List created successfully', 201);
+  async getAllPayments(@Query() query: Record<string, any>) {
+    const paymentList = await this.paymentService.getAllPayment(query as any) 
+    return sendResponse(paymentList, 'Payment List retrieved successfully', 201);
   }
 
   // ✅ Success page route

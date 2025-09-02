@@ -9,6 +9,7 @@ import {
 import { Patient } from 'src/patient/patient.entity';
 import { Assessment } from 'src/assessment/assessment.entity';
 import { User } from 'src/users/user.entity';
+import { IsInt } from 'class-validator';
 
 @Entity()
 export class Submission {
