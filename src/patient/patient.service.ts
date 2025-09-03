@@ -7,7 +7,7 @@ import { PatientRepository } from './patient.repository';
 export class PatientService {
   constructor(
     private patientRepository: PatientRepository,
-  ) {}
+  ) { }
 
   async create(createPatientDto: CreatePatientDto): Promise<Patient> {
     return await this.patientRepository.create(createPatientDto);
@@ -17,12 +17,16 @@ export class PatientService {
     return this.patientRepository.findAll(query as any)
   }
 
+  async findById(id: number) {
+    return this.patientRepository.findById(id)
+  }
+
   async update(id: number, data: Partial<CreatePatientDto>) {
-    return this.patientRepository.update(id,data)
+    return this.patientRepository.update(id, data)
   }
 
   async findPatientsByUser(userId: number) {
-  return this.patientRepository.findByField('user', { id: userId } as any);
-}
+    return this.patientRepository.findByField('user', { id: userId } as any);
+  }
 
 }

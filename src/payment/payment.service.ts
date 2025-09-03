@@ -19,7 +19,7 @@ export class PaymentService {
   }
 
   // Method to create a payment session
-  async createCheckoutSession(priceId: string, userId: number) {
+  async createCheckoutSession(priceId: string, assessmentId: string, patientId: string, userId: number) {
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -37,6 +37,8 @@ export class PaymentService {
     const paymentSession: Partial<PaymentSession> = {
       userId,
       sessionId: session.id,
+      assessmentId,
+      patientId,
       paymentStatus: 'pending',
     };
     await this.paymentSessionRepo.create(paymentSession);
@@ -44,8 +46,8 @@ export class PaymentService {
     return { url: session.url };
   }
 
-  async getAllPayment(query: Record<string, any>): Promise<Payment[]> {
-    return this.paymentSessionRepo.findAll(query as any,true)
+  async getAllPayment(query: Record<string, any>, includeRelations: boolean): Promise<Payment[]> {
+    return this.paymentRepo.findAll(query as any, includeRelations);
   }
 
   // Save payment after webhook
@@ -55,6 +57,8 @@ export class PaymentService {
     customerEmail: string;
     amount: number;
     currency: string;
+    patientId: string;
+    assessmentId: string;
     paymentStatus: string;
   }): Promise<Payment> {
     return this.paymentRepo.create(data);

@@ -19,4 +19,10 @@ export class PaymentSession {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  patientId: string; // Stripe checkout.session.id
+
+  @Column({ nullable: true })
+  assessmentId: string; // Stripe checkout.session.id
 }

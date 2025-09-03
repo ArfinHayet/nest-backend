@@ -3,11 +3,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import * as bodyParser from 'body-parser';
 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // ✅ Raw body only for Stripe webhook
+  app.use('/payment/webhook', bodyParser.raw({ type: 'application/json' }));
   const config = new DocumentBuilder()
     .setTitle('My API')
     .setDescription('The API documentation')   

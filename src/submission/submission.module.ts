@@ -13,6 +13,6 @@ import { PaymentModule } from 'src/payment/payment.module';
   imports: [TypeOrmModule.forFeature([Submission]),AssessmentModule, AiSummeryModule, QuestioneerModule,PaymentModule],
   controllers: [SubmissionController],
   exports: [SubmissionService, SubmissionRepository], 
-  providers: [SubmissionService, SubmissionRepository, AiSummeryModule,QuestioneerModule]
+  providers: [SubmissionService, SubmissionRepository, AiSummeryModule,QuestioneerModule,PaymentModule]
 })
 export class SubmissionModule {}

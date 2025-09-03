@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Headers, Req, Res, UseGuards, Query } from '@nestjs/common';
+import { Controller, Post, Get, Body, Headers, Req, Res, UseGuards, Query, NotFoundException } from '@nestjs/common';
 import { join } from 'path';
 import { PaymentService } from './payment.service';
 import { Request, Response } from 'express';
@@ -6,21 +6,71 @@ import Stripe from 'stripe';
 import { Roles } from 'src/auth/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { sendResponse } from 'src/utils/send-response';
+import { PatientService } from 'src/patient/patient.service';
+import { AssessmentService } from 'src/assessment/assessment.service';
 
-@UseGuards(AuthGuard('jwt'))
+
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
-
+  constructor(
+    private readonly paymentService: PaymentService,
+    private readonly patientService: PatientService,
+    private readonly assessmentService: AssessmentService,
+  ) { }
+  @UseGuards(AuthGuard('jwt'))
   @Roles('admin', 'user')
   @Post('checkout')
   async createCheckoutSession(
-    @Body() body: { priceId: string },
-    @Req() req: any, // req.user is added by JwtStrategy
+    @Body() body: { priceId: string; assessmentId?: string; patientId?: string },
+    @Req() req: any,
   ) {
-    const userId = req.user.userId; // ✅ extract userId from JWT
-    return this.paymentService.createCheckoutSession(body.priceId, userId);
+    const userId = req.user.userId;
+
+    const patientInfo = await this.patientService.findById(body.patientId as unknown as number);
+    if (!patientInfo) {
+      throw new NotFoundException('Patient not found');
+    }
+
+    const assessment = await this.assessmentService.findById(body.assessmentId as unknown as number);
+    if (!assessment) {
+      throw new NotFoundException('Assessment not found');
+    }
+
+    const session = await this.paymentService.createCheckoutSession(
+      body.priceId,
+      body.assessmentId,
+      body.patientId,
+      userId,
+    );
+
+    // ⚡ Only in local: simulate webhook call after 1 minute
+    if (process.env.NODE_ENV === 'development') {
+      setTimeout(async () => {
+        console.log('⚡ Triggering mock webhook for session:', 'tx1234567890');
+        // Call same logic as webhook handler
+        await this.paymentService.updatePaymentSessionStatus(
+          'tx1234567890',
+          'paid',
+        );
+
+        await this.paymentService.createPayment({
+          priceId: body.priceId,
+          sessionId: 'tx1234567890',
+          customerEmail: 'mock@example.com',
+          amount: 100, // mock value
+          currency: 'usd',
+          assessmentId: body.assessmentId,
+          patientId: body.patientId,
+          paymentStatus: 'paid',
+        });
+
+        console.log('✅ Mock webhook processed');
+      }, 60 * 1000); // 1 min
+    }
+
+    return session;
   }
+
 
   // ✅ Webhook endpoint
   @Post('webhook')
@@ -45,8 +95,10 @@ export class PaymentController {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
 
+      console.log("session", session)
+
       // ✅ update PaymentSession status to "paid"
-      await this.paymentService.updatePaymentSessionStatus(
+      const updatedPaymentSession = await this.paymentService.updatePaymentSessionStatus(
         session.id,
         session.payment_status,
       );
@@ -64,6 +116,8 @@ export class PaymentController {
           customerEmail: session.customer_details?.email,
           amount: item.price?.unit_amount ? item.price.unit_amount / 100 : 0,
           currency: item.price?.currency,
+          assessmentId: updatedPaymentSession?.assessmentId,
+          patientId: updatedPaymentSession?.patientId,
           paymentStatus: session.payment_status,
         });
       }
@@ -79,10 +133,10 @@ export class PaymentController {
   }
 
 
-  @Roles('admin','user','clinician')
+  @Roles('admin', 'user', 'clinician')
   @Get('')
   async getAllPayments(@Query() query: Record<string, any>) {
-    const paymentList = await this.paymentService.getAllPayment(query as any) 
+    const paymentList = await this.paymentService.getAllPayment(query as any, true)
     return sendResponse(paymentList, 'Payment List retrieved successfully', 201);
   }
 
