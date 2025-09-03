@@ -62,6 +62,7 @@ export class PaymentController {
           assessmentId: body.assessmentId,
           patientId: body.patientId,
           paymentStatus: 'paid',
+          userId,
         });
 
         console.log('✅ Mock webhook processed');
@@ -118,6 +119,7 @@ export class PaymentController {
           currency: item.price?.currency,
           assessmentId: updatedPaymentSession?.assessmentId,
           patientId: updatedPaymentSession?.patientId,
+          userId: updatedPaymentSession?.userId as unknown as string,
           paymentStatus: session.payment_status,
         });
       }

@@ -60,6 +60,7 @@ export class PaymentService {
     patientId: string;
     assessmentId: string;
     paymentStatus: string;
+    userId: string;
   }): Promise<Payment> {
     return this.paymentRepo.create(data);
   }

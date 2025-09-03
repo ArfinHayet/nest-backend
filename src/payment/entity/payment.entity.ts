@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { Assessment } from 'src/assessment/assessment.entity';
 import { Patient } from 'src/patient/patient.entity';
+import { User } from 'src/users/user.entity';
 
 @Entity()
 export class Payment {
@@ -24,6 +25,14 @@ export class Payment {
 
   @Column()
   paymentStatus: string;
+
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @Column({ nullable: true })
+  userId: string; // Stripe checkout.session.id
 
   @ManyToOne(() => Patient, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'patientId' })
