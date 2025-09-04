@@ -53,7 +53,7 @@ export class AppController {
         </style>
       </head>
       <body>
-        <h1>🚀 API is running. (Very Very Fast)</h1>
+        <h1>🚀 API is running.</h1>
         <p>Welcome to the backend server. </p>
       </body>
     </html>
