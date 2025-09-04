@@ -18,14 +18,13 @@ async function bootstrap() {
   // Enable automatic validation
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
+  // ✅ Stripe webhook: raw body parser
+  app.use('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }));
+
   // ✅ Prefix all routes with /api
   app.setGlobalPrefix('api');
 
-  // ✅ Stripe webhook: must use raw body parser
-  // Path now matches global prefix: /api/payment/webhook
-  app.use('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }));
-
-  // Swagger setup
+  // Swagger setup at /api-docs (outside /api prefix)
   const config = new DocumentBuilder()
     .setTitle('My API')
     .setDescription('The API documentation')
@@ -34,19 +33,8 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document); // accessible at /api/api-docs
+  SwaggerModule.setup('/api-docs', app, document); // accessible at /api-docs
 
   await app.listen(3000);
-
-  // Keep-alive ping
-  setInterval(async () => {
-    try {
-      const res = await fetch("https://nest-backend-4z6f.onrender.com/");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      console.log(`[KeepAlive] Pinged at ${new Date().toISOString()}`);
-    } catch (err: any) {
-      console.error(`[KeepAlive] Failed to ping: ${err.message}`);
-    }
-  }, 10 * 60 * 1000);
 }
 bootstrap();
