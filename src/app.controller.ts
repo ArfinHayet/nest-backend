@@ -17,7 +17,7 @@ export class AppController {
         <style>
           body {
             margin: 0;
-            padding: 0;
+            padding: 0;   
             height: 100vh;
             background-color: #fefefe;
             font-family: system-ui, -apple-system, sans-serif;
