@@ -53,7 +53,7 @@ export class AppController {
         </style>
       </head>
       <body>
-        <h1>🚀 API is running.</h1>
+        <h1>🚀 API is running. See docs</h1>
         <p>Welcome to the backend server</p>
         <button onclick="location.href='/api-docs'">See API Docs</button>
       </body>
