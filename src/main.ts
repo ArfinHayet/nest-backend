@@ -12,17 +12,18 @@ async function bootstrap() {
   app.use('/payment/webhook', bodyParser.raw({ type: 'application/json' }));
   const config = new DocumentBuilder()
     .setTitle('My API')
-    .setDescription('The API documentation')   
+    .setDescription('The API documentation')
     .setVersion('1.0')
     .addTag('auth')
-    .build();  
+    .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
 
   // Enable automatic validation using class-validator
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-
+  // Prefix all routes with /api
+  app.setGlobalPrefix('api');  
 
 
   // Enable CORS for all origins
