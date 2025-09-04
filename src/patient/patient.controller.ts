@@ -40,7 +40,6 @@ export class PatientController {
     const result = await Promise.all(
       patients.map(async (patient) => {
         const assessments = await this.submissionService.findByPatientId(patient.id);
-        console.log('assessments', assessments);
         return {
           ...patient, // spread existing patient properties
           assessments: assessments || [], // attach assessments safely
