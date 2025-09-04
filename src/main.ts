@@ -1,15 +1,31 @@
-// main.ts
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // ✅ Raw body only for Stripe webhook
-  app.use('/payment/webhook', bodyParser.raw({ type: 'application/json' }));
+
+  // Enable CORS
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: '*',
+    credentials: true,
+  });
+
+  // Enable automatic validation
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+
+  // ✅ Prefix all routes with /api
+  app.setGlobalPrefix('api');
+
+  // ✅ Stripe webhook: must use raw body parser
+  // Path now matches global prefix: /api/payment/webhook
+  app.use('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }));
+
+  // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('My API')
     .setDescription('The API documentation')
@@ -18,35 +34,19 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
-
-  // Enable automatic validation using class-validator
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  // Prefix all routes with /api
-  app.setGlobalPrefix('api');  
-
-
-  // Enable CORS for all origins
-  app.enableCors({
-    origin: '*',
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: '*',
-    credentials: true, // optional, if you need cookies or authorization headers
-  });
-
+  SwaggerModule.setup('api-docs', app, document); // accessible at /api/api-docs
 
   await app.listen(3000);
 
+  // Keep-alive ping
   setInterval(async () => {
     try {
       const res = await fetch("https://nest-backend-4z6f.onrender.com/");
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       console.log(`[KeepAlive] Pinged at ${new Date().toISOString()}`);
     } catch (err: any) {
       console.error(`[KeepAlive] Failed to ping: ${err.message}`);
     }
-  }, 10 * 60 * 1000); // 10 minutes
+  }, 10 * 60 * 1000);
 }
 bootstrap();
