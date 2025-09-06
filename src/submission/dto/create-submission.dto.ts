@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsInt, IsString, IsOptional, IsArray, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateAnswerDto } from 'src/questioneer/answer/dto/create-answer.dto';
 
@@ -51,4 +51,9 @@ export class CreateSubmissionDto {
   @ValidateNested({ each: true })
   @Type(() => CreateAnswerDto)
   answers?: CreateAnswerDto[];
+
+
+  @IsNumber()
+  @IsOptional()
+  clinicianId?: number;
 }

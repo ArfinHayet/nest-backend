@@ -52,6 +52,9 @@ export class Submission {
   @Column({ type: 'text', nullable: true })
   additionalInfo: string; // new field: extra notes
 
+  @Column({ type: 'int', nullable: true })
+  clinicianId: number;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
