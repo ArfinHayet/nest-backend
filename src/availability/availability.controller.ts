@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Body, Query, Put, Param } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AvailabilityService } from './availability.service';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
@@ -14,16 +15,19 @@ import { Roles } from 'src/auth/roles.decorator';
 @ApiTags('Availabilities')
 @Controller('availabilities')
 export class AvailabilityController {
-  constructor(private readonly availabilityService: AvailabilityService) {}
-
+  constructor(private readonly availabilityService: AvailabilityService) { }
   @Post()
   @Roles('admin', 'user', 'clinician')
-  @ApiOperation({ summary: 'Create a new availability' })
-  @ApiResponse({ status: 201, description: 'Availability created', type: Availability })
-  async create(@Body() dto: CreateAvailabilityDto): Promise<object> {
-    const availabilities = await this.availabilityService.create(dto);
-    return sendResponse(availabilities, 'Availabilities retrieved successfully', 200);
+  @ApiOperation({ summary: 'Create new availabilities' })
+  @ApiResponse({ status: 201, description: 'Availabilities created', type: [Availability] })
+  async create(
+    @Body(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true })) dto: CreateAvailabilityDto[]
+  ): Promise<object> {
+    const dataSet = await Promise.all(dto.map(item => this.availabilityService.create(item)));
+    return sendResponse(dataSet, 'Availabilities created successfully', 201);
   }
+
+
 
   @Put(':id')
   @Roles('admin', 'user', 'clinician')

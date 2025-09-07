@@ -12,7 +12,7 @@ import { User } from 'src/users/user.entity';
 export class Availability {
   @PrimaryGeneratedColumn()
   id: number;
- 
+
   @Column({
     type: 'enum',
     enum: ['all_day', 'specific_day'],
@@ -25,10 +25,13 @@ export class Availability {
   @Column({ type: 'time', nullable: true })
   time: string | null; // e.g. "09:00:00"
 
+  @Column({ type: 'time', nullable: true })
+  endTime: string | null; // e.g. "09:00:00"
+
   @Column()
   userId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' } )
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user: User;
 
   @CreateDateColumn()

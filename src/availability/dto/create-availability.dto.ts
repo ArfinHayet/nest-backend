@@ -1,4 +1,3 @@
-// src/availability/dto/create-availability.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
 
@@ -22,6 +21,11 @@ export class CreateAvailabilityDto {
   @IsString()
   @IsOptional()
   time?: string;
+
+  @ApiProperty({ example: '11:00:00', required: false })
+  @IsString()
+  @IsOptional()
+  endTime?: string;
 
   @ApiProperty({ example: 'user-id-123' })
   @IsString()
