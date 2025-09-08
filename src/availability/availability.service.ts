@@ -15,12 +15,7 @@ export class AvailabilityService {
   // ✅ Create new availability
   async create(dto: CreateAvailabilityDto): Promise<Availability> {
     return await this.dataSource.transaction(async (manager) => {
-      const availability = manager.create(Availability, {
-        availabilityType: dto.availabilityType,
-        day: dto.day,
-        time: dto.time,
-        userId: dto.userId,
-      });
+      const availability = manager.create(Availability,dto);
       await manager.save(availability);
       return availability;
     });
