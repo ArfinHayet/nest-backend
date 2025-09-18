@@ -23,8 +23,8 @@ export class AnswerService {
 
 
 
-  async findAll(): Promise<Partial<Answer>[]> {
-    return this.answerRepository.findAll({}, true);
+  async findAll(query: Record<string, any>, includeRelations = true): Promise<Partial<Answer>[]> {
+    return this.answerRepository.findAll(query as any, includeRelations); 
   }
 
   async findById(id: number): Promise<Answer | null> {

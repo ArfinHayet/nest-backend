@@ -1,4 +1,4 @@
-  import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+  import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
@@ -38,9 +38,9 @@ export class AnswerController {
   @Roles('admin', 'user')
   @ApiOperation({ summary: 'Get all answers' })
   @ApiResponse({ status: 200, description: 'List of answers', type: [Answer] })
-  async findAll() {
-    const answers = await this.answerService.findAll();
-    return sendResponse(answers, 'Answers retrieved successfully', 200);
+  async findAll(@Query() query: Record<string, any>) {
+    const answers = await this.answerService.findAll(query);
+    return sendResponse(answers, 'Answers retrieved successfully', 200);   
   }
 
   @Get(':id')
