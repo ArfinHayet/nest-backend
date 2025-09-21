@@ -23,7 +23,7 @@ export class UploadService {
     if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
       return cb(new Error('Only image files are allowed!'), false);
     }
-    cb(null, true);
+    cb(null, true);  
   }
 
   // Move file from temp-uploads to uploads folder
