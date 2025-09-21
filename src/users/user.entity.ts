@@ -53,6 +53,9 @@ export class User {
   @Column({ nullable: true })
   certification: string; // ✅ Certification file path or URL
 
+  @Column({ nullable: true })
+  firebaseUid : string
+
   // Hash password before inserting/updating
   @BeforeInsert()
   @BeforeUpdate()

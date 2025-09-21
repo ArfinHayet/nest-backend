@@ -16,6 +16,8 @@ import { DataSource } from 'typeorm';
 import { SendOtpDto } from './dto/auto.dto';
 import { VerifyOtpDto } from './dto/auto.dto';
 import { LoginDto } from './dto/auto.dto';
+import { FirebaseLoginDto } from './dto/firebase-login.dto';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 // ====== Controller ======
 @Controller('auth')
@@ -24,6 +26,7 @@ export class AuthController {
         private readonly authService: AuthService,
         private readonly usersService: UsersService,
         private otpService: OtpService,
+        private firebaseAuthService : FirebaseService,
         @InjectDataSource() private readonly dataSource: DataSource,
     ) { }
 
@@ -110,9 +113,50 @@ export class AuthController {
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid credentials');
         }
- 
+
         const token = await this.authService.login(user);
         const filteredUser = omit(user, ['password']);
         return sendResponse({ filteredUser, token }, 'User logged in successfully', 200);
+    }
+
+
+    @Post('social-login')
+    async firebaseLogin(@Body() dto: FirebaseLoginDto) {
+        const { idToken } = dto;
+
+        // 1. Verify Firebase ID token
+        let decoded;
+        try {
+            decoded = await this.firebaseAuthService.verifyIdToken(idToken);
+        } catch (err) {
+            throw new UnauthorizedException('Invalid or expired Firebase token');
+        }
+
+        const { uid, email, name } = decoded;
+
+        if (!email) {
+            throw new UnauthorizedException('Firebase account has no email');
+        }
+
+        // 2. Check if user exists in DB
+        let user = await this.usersService.findByEmailOrPhone(email);
+
+        if (!user) {
+            // 3. Create user if not exists
+            user = await this.usersService.create({
+                email,
+                name: name || email.split('@')[0], // fallback username
+                firebaseUid: uid,
+            });
+        }
+
+        // 4. Generate JWT from your AuthService
+        const token = await this.authService.login(user);
+
+        return sendResponse(
+            { user: omit(user, ['password']), token },
+            user ? 'User logged in successfully' : 'User created and logged in successfully',
+            200,
+        );
     }
 }

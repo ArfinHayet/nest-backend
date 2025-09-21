@@ -42,12 +42,12 @@ export class CreateUserDto {
   @Max(150)
   age: number;
 
-  @ApiProperty({ example: 'Bangladesh' , nullable: true })
+  @ApiProperty({ example: 'Bangladesh', nullable: true })
   @IsString()
   @IsOptional()
   country: string;
 
-  @ApiProperty({ example: 'Chattogram' , nullable: true})
+  @ApiProperty({ example: 'Chattogram', nullable: true })
   @IsString()
   @IsOptional()
   state: string;
@@ -57,7 +57,7 @@ export class CreateUserDto {
   @IsOptional()
   postCode: string;
 
-  @ApiProperty({ example: '123 Main Street' , nullable: true})
+  @ApiProperty({ example: '123 Main Street', nullable: true })
   @IsString()
   @IsOptional()
   street: string;
@@ -98,8 +98,12 @@ export class CreateUserDto {
   @IsOptional()
   practiceName?: string;
 
-  @ApiProperty({ example: 'certification.pdf', required: false , nullable: true})
+  @ApiProperty({ example: 'certification.pdf', required: false, nullable: true })
   @IsString()
   @IsOptional()
   certification?: string; // file path or URL
+
+  @IsString()
+  @IsOptional()
+  firebaseUid: string
 }

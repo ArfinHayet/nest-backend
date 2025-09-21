@@ -12,7 +12,7 @@ export class UsersService {
     private userRepo: UserRepository
   ) { }
 
-  create(createUserDto: CreateUserDto) {
+  create(createUserDto: Partial<CreateUserDto>) {
     const user = this.userRepo.create(createUserDto);
     return user;
   }

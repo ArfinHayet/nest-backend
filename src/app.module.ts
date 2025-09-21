@@ -16,6 +16,7 @@ import { PrescriptionModule } from './prescription/prescription.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { LeaveModule } from './leave/leave.module';
 import { BlogModule } from './blog/blog.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
    
 @Module({
@@ -36,7 +37,7 @@ import { BlogModule } from './blog/blog.module';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule
   ],
   controllers: [AppController],
   providers: [AppService]
