@@ -129,7 +129,8 @@ export class AuthController {
         try {
             decoded = await this.firebaseAuthService.verifyIdToken(idToken);
         } catch (err) {
-            throw new UnauthorizedException('Invalid or expired Firebase token');
+            console.log("log",err)
+            throw new UnauthorizedException(err);
         }
 
         const { uid, email, name } = decoded;
