@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { FirebaseService } from './firebase.service';
-import * as admin from 'firebase-admin'; 
+import * as admin from 'firebase-admin';
+import * as serviceAccount from '../utils/serviceAccountKey.json';          
 
 @Global()
 @Module({
@@ -10,11 +11,7 @@ import * as admin from 'firebase-admin';
       useFactory: () => {
         if (!admin.apps.length) {
           admin.initializeApp({
-            credential: admin.credential.cert({
-              projectId: process.env.FIREBASE_PROJECT_ID,
-              clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-              privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            }),
+            credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
           });
         }   
         return admin;  
