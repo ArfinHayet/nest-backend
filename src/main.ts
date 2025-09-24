@@ -3,17 +3,21 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as bodyParser from 'body-parser';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
 
+  app.use('/temp-uploads', express.static(join(__dirname, '..', 'temp-uploads'))); 
   // Enable CORS
   app.enableCors({
     origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: '*',
     credentials: true,
-  });
+  }); 
 
   // Enable automatic validation
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
