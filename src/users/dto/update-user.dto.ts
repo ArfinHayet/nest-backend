@@ -72,6 +72,12 @@ export class UpdateUserDto {
   @IsOptional()
   knowHow?: string;
 
+
+  @ApiProperty({ example: 'image.png', description: 'image.png', required: false })
+  @IsString()
+  @IsOptional()
+  image?: string;
+
   @ApiProperty({ example: '123456', description: 'One Time Password sent to user', required: false })
   @IsString()
   @IsOptional()

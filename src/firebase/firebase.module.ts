@@ -1,7 +1,8 @@
 import { Module, Global } from '@nestjs/common';
 import { FirebaseService } from './firebase.service';
 import * as admin from 'firebase-admin';
-import * as serviceAccount from '../utils/serviceAccountKey.json';          
+// @ts-ignore if TS complains about JSON imports
+import * as serviceAccount from '../utils/serviceAccountKey.json';
 
 @Global()
 @Module({
@@ -9,16 +10,18 @@ import * as serviceAccount from '../utils/serviceAccountKey.json';
     {
       provide: 'FIREBASE_ADMIN',
       useFactory: () => {
-        if (!admin.apps.length) {
+        // Prevent "already exists" error
+        if (admin.apps.length === 0) {
           admin.initializeApp({
             credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
+            projectId: 'neuro-check-pro', // 👈 explicit project ID
           });
-        }   
-        return admin;  
-      }, 
+        }
+        return admin;
+      },
     },
     FirebaseService,
   ],
-  exports: ['FIREBASE_ADMIN',FirebaseService],
+  exports: ['FIREBASE_ADMIN', FirebaseService],
 })
 export class FirebaseModule {}

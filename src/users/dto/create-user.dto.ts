@@ -106,4 +106,9 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   firebaseUid: string
+
+
+  @IsString()
+  @IsOptional()
+  image: string
 }

@@ -56,6 +56,9 @@ export class User {
   @Column({ nullable: true })
   firebaseUid : string
 
+  @Column({nullable: true })
+  image: string
+
   // Hash password before inserting/updating
   @BeforeInsert()
   @BeforeUpdate()

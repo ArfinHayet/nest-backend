@@ -21,6 +21,10 @@ async function bootstrap() {
   // ✅ Stripe webhook: raw body parser
   app.use('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }));
 
+
+  // Only the Calendly webhook route should use raw body
+  app.use('/api/webhooks/calendly', bodyParser.raw({ type: 'application/json' }));
+
   // ✅ Prefix all routes with /api
   app.setGlobalPrefix('api');
 

@@ -26,7 +26,7 @@ export class AuthController {
         private readonly authService: AuthService,
         private readonly usersService: UsersService,
         private otpService: OtpService,
-        private firebaseAuthService : FirebaseService,
+        private firebaseAuthService: FirebaseService,
         @InjectDataSource() private readonly dataSource: DataSource,
     ) { }
 
@@ -124,40 +124,33 @@ export class AuthController {
     async firebaseLogin(@Body() dto: FirebaseLoginDto) {
         const { idToken } = dto;
 
-        // 1. Verify Firebase ID token
-        let decoded;
-        try {
-            decoded = await this.firebaseAuthService.verifyIdToken(idToken);
-        } catch (err) {
-            console.log("log",err)
-            throw new UnauthorizedException(err);
-        }
+        // 1️⃣ Verify Firebase ID token
+        const decoded = await this.firebaseAuthService.verifyIdToken(idToken?.trim().replace(/^"|"$/g, ""));
 
-        const { uid, email, name } = decoded;
+        const { uid, email, name, picture, email_verified } = decoded;
 
-        if (!email) {
-            throw new UnauthorizedException('Firebase account has no email');
-        }
-
-        // 2. Check if user exists in DB
+        // 2️⃣ Check if user exists
         let user = await this.usersService.findByEmailOrPhone(email);
 
         if (!user) {
-            // 3. Create user if not exists
+            // 3️⃣ Create user if not exists
             user = await this.usersService.create({
                 email,
-                name: name || email.split('@')[0], // fallback username
+                name: name || email.split('@')[0],
                 firebaseUid: uid,
+                // picture,
+                // emailVerified: email_verified,
             });
         }
 
-        // 4. Generate JWT from your AuthService
+        // 4️⃣ Generate JWT for your app
         const token = await this.authService.login(user);
 
-        return sendResponse(
-            { user: omit(user, ['password']), token },
-            user ? 'User logged in successfully' : 'User created and logged in successfully',
-            200,
-        );
+        return {
+            user: omit(user, ['password']),
+            token,
+            message: user ? 'User logged in successfully' : 'User created and logged in successfully',
+        };
     }
+
 }

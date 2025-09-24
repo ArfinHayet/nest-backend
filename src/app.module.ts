@@ -18,6 +18,7 @@ import { LeaveModule } from './leave/leave.module';
 import { BlogModule } from './blog/blog.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { UploadModule } from './upload/upload.module';
+import { ZoomService } from './zoom/zoom.service';
 
    
 @Module({
@@ -41,7 +42,7 @@ import { UploadModule } from './upload/upload.module';
     UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService, ZoomService]
 })
 export class AppModule { }
    
