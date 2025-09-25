@@ -59,5 +59,9 @@ export class CreatePatientDto {
   userId: number;
 
 
+  @IsOptional()
+  @IsString()
+  image?: string;
+
 
 }

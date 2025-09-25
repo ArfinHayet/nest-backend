@@ -34,5 +34,9 @@ export class Patient {
   @Column({ nullable: false })
   userId: number;
 
-  
+
+  @Column({ nullable: true })
+  image: string;
+
+
 }
