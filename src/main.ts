@@ -11,6 +11,8 @@ async function bootstrap() {
   
 
   app.use('/temp-uploads', express.static(join(__dirname, '..', 'temp-uploads'))); 
+  console.log('Serving uploads from:', join(__dirname, '..', 'temp-uploads'));
+
   // Enable CORS
   app.enableCors({
     origin: '*',

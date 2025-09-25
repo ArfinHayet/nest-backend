@@ -10,7 +10,7 @@ import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('upload')
 export class UploadController {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(private readonly uploadService: UploadService) { }
 
   @Post()
   @UseInterceptors(
@@ -18,11 +18,29 @@ export class UploadController {
   )
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  uploadFile(@UploadedFile() file: MulterFile) {
-    return sendResponse({
-      filename: file.filename,
-      path: file.path,
-    },'File uploaded successfully',201)
+  async uploadFile(@UploadedFile() file: MulterFile) {
+    try {
+      if (!file) {
+        throw new Error('No file provided');
+      }
+
+      return sendResponse(
+        {
+          filename: file.filename,
+          path: file.path,
+        },
+        'File uploaded successfully',
+        201,
+      );
+    } catch (error) {
+      console.error('Upload error:', error);
+
+      return sendResponse(
+        { error: error || 'Unknown error occurred' },
+        'File upload failed',
+        500,
+      );
+    }
   }
 
   // Factory function that calls service methods
