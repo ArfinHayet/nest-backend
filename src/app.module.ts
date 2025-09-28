@@ -19,12 +19,14 @@ import { BlogModule } from './blog/blog.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { UploadModule } from './upload/upload.module';
 import { ZoomService } from './zoom/zoom.service';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AppointmentsModule } from './appointments/appointments.module';
 
    
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],  
@@ -39,7 +41,7 @@ import { ZoomService } from './zoom/zoom.service';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule
   ],
   controllers: [AppController],
   providers: [AppService, ZoomService]

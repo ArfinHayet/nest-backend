@@ -1,10 +1,15 @@
 // src/zoom/zoom.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
+import { OnEvent } from '@nestjs/event-emitter';
+import { Appointments } from 'src/appointments/entity/appointments.entity';
+
 
 @Injectable()
 export class ZoomService {
+
+  private readonly logger = new Logger(ZoomService.name);
   private clientId = process.env.ZOOM_CLIENT_ID!;
   private clientSecret = process.env.ZOOM_CLIENT_SECRET!;
   private accountId = process.env.ZOOM_ACCOUNT_ID!;
@@ -51,4 +56,35 @@ export class ZoomService {
     };
     return jwt.sign(payload, this.sdkSecret, { algorithm: 'HS256' });
   }
+
+  
+
+  @OnEvent('appointment.created')
+  async handleAppointmentCreatedEvent(appointment: Appointments) {
+    try {
+      this.logger.log(`📅 Creating Zoom meeting for appointment ${appointment.id}`);
+
+      const startTime = new Date(appointment.time); // ensure it's a Date object
+
+      const meeting = await this.createMeeting(
+        'me', // Zoom userId (could be email)
+        `Appointment with patient ${appointment.patientId}`,
+        startTime.toISOString(),
+        30,
+      );
+
+      this.logger.log(`✅ Zoom meeting created: ${meeting.join_url}`);
+
+      // 👉 Optionally update appointment with join_url
+      // await this.appointmentsRepository.update(appointment.id, { link: meeting.join_url });
+
+    } catch (err) {
+      console.log(err)
+      this.logger.error(
+        `❌ Failed to create Zoom meeting for appointment ${appointment.id}`,
+        err.stack,
+      );
+    }
+  }
+
 }
