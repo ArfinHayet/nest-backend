@@ -14,7 +14,7 @@ export class Appointments {
 
   @Column()
   clinicianId: number;
- 
+
   @Column({ type: 'timestamp' })
   time: Date;
 
@@ -25,4 +25,13 @@ export class Appointments {
   @ManyToOne(() => Patient, (patient) => patient.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'patientId' })
   patient: Patient;
+
+  @Column({ nullable: true })
+  meetingId: string;
+
+  @Column({ nullable: true })
+  meetingPassword: string;
+
+  @Column({ nullable: true })
+  displayName: string;
 }

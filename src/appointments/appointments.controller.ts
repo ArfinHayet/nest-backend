@@ -24,7 +24,7 @@ export class AppointmentsController {
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     const appointment = await this.appointmentsService.create(createAppointmentDto);
     this.eventEmitter.emit('appointment.created', appointment);
-    return sendResponse(appointment, 'Appointment created successfully', 201);
+    return sendResponse(appointment, 'Appointment created successfully. Zoom link creation is in progress', 201);
   }
 
   @Get()

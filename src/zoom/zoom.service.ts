@@ -4,10 +4,16 @@ import axios from 'axios';
 import * as jwt from 'jsonwebtoken';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Appointments } from 'src/appointments/entity/appointments.entity';
+import { AppointmentsService } from 'src/appointments/appointments.service';
 
 
 @Injectable()
 export class ZoomService {
+  
+  constructor(
+    private readonly appointmentsService: AppointmentsService,
+  ){}
+
 
   private readonly logger = new Logger(ZoomService.name);
   private clientId = process.env.ZOOM_CLIENT_ID!;
@@ -28,7 +34,13 @@ export class ZoomService {
     return res.data.access_token;
   }
 
-  async createMeeting(userId: string, topic: string, start: string, duration = 30) {
+  async createMeeting(
+    userId: string,
+    topic: string,
+    start: string,
+    duration = 30,
+    displayName = 'User'
+  ) {
     const token = await this.getAccessToken();
     const res = await axios.post(
       `https://api.zoom.us/v2/users/${userId}/meetings`,
@@ -40,8 +52,17 @@ export class ZoomService {
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
-    return res.data; // contains join_url, start_url
+
+    return {
+      join_url: res.data.join_url,
+      start_url: res.data.start_url,
+      meetingId: res.data.id,
+      meetingPassword: res.data.password,
+      displayName,
+      sdkSignature: this.generateSdkSignature(res.data.id.toString(), 0), // 0 = participant
+    };
   }
+
 
   generateSdkSignature(meetingNumber: string, role: 0 | 1) {
     const iat = Math.floor(Date.now() / 1000);
@@ -57,7 +78,7 @@ export class ZoomService {
     return jwt.sign(payload, this.sdkSecret, { algorithm: 'HS256' });
   }
 
-  
+
 
   @OnEvent('appointment.created')
   async handleAppointmentCreatedEvent(appointment: Appointments) {
@@ -67,24 +88,30 @@ export class ZoomService {
       const startTime = new Date(appointment.time); // ensure it's a Date object
 
       const meeting = await this.createMeeting(
-        'me', // Zoom userId (could be email)
+        'me',
         `Appointment with patient ${appointment.patientId}`,
         startTime.toISOString(),
         30,
+        `Patient ${appointment.patientId}`
       );
 
       this.logger.log(`✅ Zoom meeting created: ${meeting.join_url}`);
 
-      // 👉 Optionally update appointment with join_url
-      // await this.appointmentsRepository.update(appointment.id, { link: meeting.join_url });
+      // 👉 Optionally update appointment with meeting details
+      await this.appointmentsService.update(appointment.id, { 
+        link: meeting.join_url,
+        meetingId: meeting.meetingId,
+        meetingPassword: meeting.meetingPassword,
+        displayName: meeting.displayName
+      });     
 
     } catch (err) {
-      console.log(err)
       this.logger.error(
         `❌ Failed to create Zoom meeting for appointment ${appointment.id}`,
         err.stack,
       );
     }
   }
+
 
 }
