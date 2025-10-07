@@ -9,7 +9,7 @@ import { AppointmentsService } from 'src/appointments/appointments.service';
 
 @Injectable()
 export class ZoomService {
-  
+     
   constructor(
     private readonly appointmentsService: AppointmentsService,
   ){}
