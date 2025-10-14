@@ -10,18 +10,18 @@ export class OtpService {
   constructor(
     private readonly otpRepo: OtpRepository
   ) { }
-  private OTP_EXPIRY_MINUTES = 5;
+  private OTP_EXPIRY_MINUTES = 2;
 
 
   async findOtp(identifier: string) {
-    return  await this.otpRepo.findOneByCondition({ identifier }, 'createdAt')
+    return await this.otpRepo.findOneByCondition({ identifier }, 'createdAt')
   }
 
   async removeOtp(id: number) {
     return await this.otpRepo.deleteById(id)
   }
 
-  async saveOtp(identifier: string,hashedOtp : string,expiresAt : Date) {
+  async saveOtp(identifier: string, hashedOtp: string, expiresAt: Date) {
     // Store OTP in DB
     return await this.otpRepo.create({
       identifier,
@@ -30,8 +30,8 @@ export class OtpService {
     });
   }
   generateOtp(): string {
-    // return randomInt(100000, 999999).toString(); // 6-digit code
-    return '5431';
+    const otp = randomInt(1000, 10000); // 10000 is exclusive, so range is 1000-9999
+    return otp.toString();
   }
 
   async hashOtp(otp: string): Promise<string> {

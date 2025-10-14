@@ -67,4 +67,9 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsString()
   displayName?: string;
+
+
+  @IsOptional()
+  @IsString()
+  signature?: string;
 }

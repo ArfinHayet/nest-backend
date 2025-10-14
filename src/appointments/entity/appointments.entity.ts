@@ -34,4 +34,8 @@ export class Appointments {
 
   @Column({ nullable: true })
   displayName: string;
+
+
+  @Column({ nullable: true })
+  signature: string;
 }

@@ -102,7 +102,8 @@ export class ZoomService {
         link: meeting.join_url,
         meetingId: meeting.meetingId,
         meetingPassword: meeting.meetingPassword,
-        displayName: meeting.displayName
+        displayName: meeting.displayName,
+        signature: meeting.sdkSignature
       });     
 
     } catch (err) {

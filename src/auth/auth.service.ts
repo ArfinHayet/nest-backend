@@ -1,5 +1,5 @@
 // auth.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
 import { OtpService } from '../otp/otp.service';
@@ -8,36 +8,43 @@ import { UserRepository } from 'src/users/user.repository';
 import { OtpRepository } from 'src/otp/otp.repository';
 import { isEmail } from 'class-validator';
 import { JwtService } from '@nestjs/jwt';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly otpService: OtpService,
     private readonly usersService: UsersService,
-    private readonly jwtService: JwtService
+    private readonly jwtService: JwtService,
+    private readonly eventEmitter: EventEmitter2
   ) { }
 
   async sendOtp(identifier: string): Promise<{ message: string }> {
-    const isEmailAddress = isEmail(identifier);
-    // Generate OTP and hash it
-    const otp = this.otpService.generateOtp();
-    const hashedOtp = await this.otpService.hashOtp(otp);
-    const expiresAt = this.otpService.getExpiryDate();
+    try {
+      const isEmailAddress = isEmail(identifier);
 
-    // Store OTP in DB
-    await this.otpService.saveOtp(
-      identifier,
-      hashedOtp,
-      expiresAt);
+      // Generate OTP
+      const otp = this.otpService.generateOtp();
+      const hashedOtp = await this.otpService.hashOtp(otp);
+      const expiresAt = this.otpService.getExpiryDate();
 
-    // Send OTP via appropriate channel
-    if (isEmailAddress) {
-      //   await sendOtpByEmail(identifier, otp);
-    } else {
-      //   await sendOtpBySms(identifier, otp); // you must implement this
+      // Save OTP in DB
+      await this.otpService.saveOtp(identifier, hashedOtp, expiresAt);
+      // Send OTP
+      if (isEmailAddress) {
+        // TODO: implement email sending
+        // await this.sendOtpByEmail(identifier, otp);
+        this.eventEmitter.emit('email.otp', { email: identifier, otp });
+      } else {
+        // Phone OTP via EventEmitter
+        this.eventEmitter.emit('phone.otp', { phone: identifier, otp });
+      }
+
+      return { message: "OTP generated. Sending in progress." };
+    } catch (err) {
+      console.error('Error sending OTP:', err);
+      throw new InternalServerErrorException('Failed to send OTP. Please try again.');
     }
-
-    return;
   }
 
 

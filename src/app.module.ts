@@ -21,6 +21,7 @@ import { UploadModule } from './upload/upload.module';
 import { ZoomService } from './zoom/zoom.service';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AppointmentsModule } from './appointments/appointments.module';
+import { CustomMailerModule } from './mailer/mailer.module'
 
    
 @Module({
@@ -41,10 +42,10 @@ import { AppointmentsModule } from './appointments/appointments.module';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule, CustomMailerModule
   ],
   controllers: [AppController],
-  providers: [AppService, ZoomService]
+  providers: [AppService, ZoomService, CustomMailerModule]
 })
 export class AppModule { }
    

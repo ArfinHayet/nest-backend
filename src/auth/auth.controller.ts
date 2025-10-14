@@ -34,18 +34,22 @@ export class AuthController {
     async sendOtp(@Body() dto: SendOtpDto) {
         const { identifier } = dto;
 
+        // Check if OTP already exists
         const existingOtp = await this.otpService.findOtp(identifier);
-        if (existingOtp) {
-            const now = new Date();
-            if (existingOtp.expiresAt > now) {
-                throw new ConflictException('Cannot send new OTP. An active OTP already exists.');
-            } else {
-                await this.otpService.removeOtp(existingOtp.id);
-            }
+        const now = new Date();
+
+        if (existingOtp && existingOtp.expiresAt > now) {
+            throw new ConflictException('Cannot send new OTP. An active OTP already exists.');
         }
 
-        await this.authService.sendOtp(identifier);
-        return sendResponse(null, 'OTP sent successfully.', 201);
+        if (existingOtp && existingOtp.expiresAt <= now) {
+            await this.otpService.removeOtp(existingOtp.id);
+        }
+
+        // Send new OTP
+        const result = await this.authService.sendOtp(identifier);
+
+        return sendResponse(null, result.message, 201);
     }
 
     @Post('verify-otp')
