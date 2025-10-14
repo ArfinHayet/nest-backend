@@ -20,12 +20,12 @@ const templateDir = existsSync(prodPath) ? prodPath : devPath;
         port: 465,
         secure: true,
         auth: {
-          user: 'hello@neurocheckpro.com',
+          user: 'arshad@neurocheckpro.com',
           pass: 'DJHagyvu5pz',
         },
       },
       defaults: {
-        from: '"NeuroCheck Pro" <hello@neurocheckpro.com>',
+        from: '"NeuroCheck Pro" <arshad@neurocheckpro.com>',
       },
       template: {
         dir: templateDir, // ✅ Works in both dist and src
