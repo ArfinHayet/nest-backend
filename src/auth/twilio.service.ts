@@ -1,5 +1,5 @@
 // src/twilio/twilio.service.ts
-import { Injectable,Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import Twilio from 'twilio';
@@ -8,13 +8,13 @@ import Twilio from 'twilio';
 export class TwilioService {
     private client: Twilio.Twilio;
     private from: string;
-    
+
     private readonly logger = new Logger(TwilioService.name);
 
     constructor(private configService: ConfigService) {
-        const accountSid = this.configService.get<string>('ACf28523be067644afde357b133b776dd4');
-        const authToken = this.configService.get<string>('5d101dfc807d37893fe6e8ef44c92e9d');
-        this.from = this.configService.get<string>('+447723485041');
+        const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
+        const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
+        this.from = this.configService.get<string>('TWILIO_PHONE_NUMBER');
         this.client = Twilio(accountSid, authToken);
     }
 
