@@ -10,7 +10,7 @@ export class OtpService {
   constructor(
     private readonly otpRepo: OtpRepository
   ) { }
-  private OTP_EXPIRY_MINUTES = 2;
+  private OTP_EXPIRY_MINUTES = 5;
 
 
   async findOtp(identifier: string) {
