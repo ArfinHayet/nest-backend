@@ -70,6 +70,47 @@ export class AuthController {
         return sendResponse({ verified: true }, 'OTP verified successfully', 200);
     }
 
+    @Post('reset-password')
+    async resetPassword(
+        @Body() body: Partial<CreateUserDto>
+    ) {
+        const { email, otp, password } = body;
+
+        // 1️⃣ Find user
+        const user = await this.usersService.findByEmailOrPhone(email);
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        // 2️⃣ Verify OTP
+        const otpEntry = await this.otpService.findOtp(email);
+        if (!otpEntry || otpEntry.expiresAt < new Date()) {
+            throw new BadRequestException('OTP expired or not found');
+        }
+
+        const isOtpValid = await this.otpService.verifyOtp(otp, otpEntry.hashedOtp);
+        if (!isOtpValid) {
+            throw new UnauthorizedException('Invalid OTP');
+        }
+
+        // 4️⃣ Update password
+        await this.usersService.update(user.id, { password: password });
+
+        // 5️⃣ Clean up OTP
+        await this.otpService.removeOtp(otpEntry.id);
+
+        // 6️⃣ Log user in and issue token
+        const updatedUser = await this.usersService.findById(user.id);
+        const token = await this.authService.login(updatedUser);
+
+        return sendResponse(
+            { user: omit(updatedUser, ['password']), token },
+            'Password reset successfully and logged in',
+            200
+        );
+    }
+
+
     // Signup left without ApiProperty as requested
     @Post('signup')
     async signup(@Body() createUserDto: CreateUserDto) {
