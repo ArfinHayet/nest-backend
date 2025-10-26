@@ -22,6 +22,7 @@ export class QuestionnaireController {
   @ApiOperation({ summary: 'Create a new questionnaire' })
   @ApiResponse({ status: 201, description: 'Questionnaire created successfully', type: Questionnaire })
   async create(@Body() dto: CreateQuestionnaireDto) {
+    console.log(dto)
     const questions = await this.questionnaireService.create(dto);
     return sendResponse(questions, "Questionnaire created successfully", 201)
   }

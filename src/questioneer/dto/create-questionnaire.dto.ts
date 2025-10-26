@@ -47,4 +47,9 @@ export class CreateQuestionnaireDto {
   @IsString({ each: true })
   @IsOptional()
   options?: string[];
+
+
+  @IsNumber()
+  @IsOptional()
+  questiontypeid: number;
 }

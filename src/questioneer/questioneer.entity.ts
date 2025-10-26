@@ -1,5 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Assessment } from '../assessment/assessment.entity';
+import { QuestionCategory } from 'src/question-category/entity/question-category.entity';
 
 @Entity()
 export class Questionnaire {
@@ -10,7 +18,7 @@ export class Questionnaire {
   @JoinColumn({ name: 'assessmentId' })
   assessment: Assessment;
 
-  @Column() 
+  @Column()
   assessmentId: number; // Foreign key column
 
   @Column({ type: 'text' })
@@ -22,11 +30,17 @@ export class Questionnaire {
   @Column({ default: 0 })
   order: number;
 
-  @Column("text", { array: true, nullable: true })
+  @Column('text', { array: true, nullable: true })
   options: string[];
 
   @Column({ type: 'text', nullable: true })
-  answerType : string;
+  answerType: string;
 
+  // ✅ FIXED: Correct foreign key to QuestionCategory
+  @ManyToOne(() => QuestionCategory, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'questiontypeid' }) // <-- FIXED this line
+  questionType: QuestionCategory;
 
+  @Column({ nullable: true })
+  questiontypeid: number; // Foreign key column
 }

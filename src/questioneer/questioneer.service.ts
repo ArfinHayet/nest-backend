@@ -4,6 +4,7 @@ import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
 import { UpdateQuestionnaireDto } from './dto/update-questionnaire.dto';
 import { Questionnaire } from '../questioneer/questioneer.entity';
 import { NotFoundException } from '@nestjs/common';
+import { QuestionCategory } from 'src/question-category/entity/question-category.entity';
 
 @Injectable()
 export class QuestionnaireService {
@@ -23,7 +24,13 @@ export class QuestionnaireService {
   }
 
   async findAll(query): Promise<Questionnaire[]> {
-    return this.questionnaireRepository.findAll(query as any);  
+    const questions = await this.questionnaireRepository.findByJoin(
+      QuestionCategory,
+      'question_category',
+      'entity.questiontypeid = question_category.id',
+      query
+    );   
+    return questions
   }
 
   async findById(query): Promise<Questionnaire> {
