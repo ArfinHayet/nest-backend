@@ -47,7 +47,7 @@ export class CreateQuestionnaireDto {
   @ApiProperty({
     description: 'Available options for the question (used if answerType is MultipleChoice)',
     example: ['Option A', 'Option B', 'Option C'],
-    required: false,
+    required: false,   
   })
   @IsArray()
   @IsString({ each: true })
