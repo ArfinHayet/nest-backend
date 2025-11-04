@@ -61,4 +61,8 @@ export class Submission {
 
   @Column({ type: 'text', nullable: true })
   paidAmount: string;
+
+
+  @Column({ type: 'text', nullable: true })
+  questionType: string;
 }

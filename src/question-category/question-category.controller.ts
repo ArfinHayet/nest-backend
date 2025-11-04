@@ -1,5 +1,4 @@
-// question-category.controller.ts
-import { Controller, Post, Get, Body, Query, Put, Param, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Body, Query, Put, Param, BadRequestException, UseGuards, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { QuestionCategoryService } from './question-category.service';
 import { CreateQuestionCategoryDto } from './dto/create-question-category.dto';
@@ -48,5 +47,19 @@ export class QuestionCategoryController {
   async findAll(@Query() query: Record<string, any>) {
     const categories = await this.questionCategoryService.findAll(query);
     return sendResponse(categories, 'Question categories retrieved successfully', 200);
+  }
+
+  // ✅ DELETE METHOD
+  @Delete(':id')
+  @Roles('admin','user')
+  @ApiOperation({ summary: 'Delete a question category' })
+  @ApiResponse({ status: 200, description: 'Question category deleted successfully' })
+  async delete(@Param('id') id: number): Promise<object> {
+    try {
+      await this.questionCategoryService.delete(id);
+      return sendResponse(null, 'Question category deleted successfully', 200);
+    } catch (err) {
+      throw new BadRequestException(err.message || 'Failed to delete question category');
+    }
   }
 }

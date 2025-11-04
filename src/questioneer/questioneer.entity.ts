@@ -43,4 +43,7 @@ export class Questionnaire {
 
   @Column({ nullable: true })
   questiontypeid: number; // Foreign key column
+
+  @Column({ nullable: true })
+  variant: string; // Foreign key column
 }

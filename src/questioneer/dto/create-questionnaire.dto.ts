@@ -7,6 +7,12 @@ export enum AnswerType {
   MULTIPLE_CHOICE = 'MultipleChoice',
 }
 
+export enum QuestionVariant {
+  INTERNAL = 'internal',
+  EXTERNAL = 'external',
+}
+
+
 export class CreateQuestionnaireDto {
   @ApiProperty({
     description: 'The ID of the related assessment',
@@ -52,4 +58,10 @@ export class CreateQuestionnaireDto {
   @IsNumber()
   @IsOptional()
   questiontypeid: number;
+
+
+  @IsString()
+  @IsEnum(QuestionVariant, { message: 'Variant must be one of: multiple_choice, true_false, short_answer' })
+  @IsOptional()
+  variant: string; // Foreign key column
 }

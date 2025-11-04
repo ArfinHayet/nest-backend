@@ -1,5 +1,5 @@
  // question-category.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { QuestionCategory } from './entity/question-category.entity';
 import { CreateQuestionCategoryDto } from './dto/create-question-category.dto';
 import { QuestionCategoryRepository } from './entity/question-category.repository';
@@ -28,5 +28,15 @@ export class QuestionCategoryService {
 
   async findByName(name: string) {
     return this.questionCategoryRepository.findByField('name', name);
+  }
+
+  // ✅ DELETE METHOD
+  async delete(id: number): Promise<void> {
+    const category = await this.questionCategoryRepository.findById(id);
+    if (!category) {
+      throw new NotFoundException('Question category not found');
+    }
+
+    await this.questionCategoryRepository.deleteById(id);
   }
 }

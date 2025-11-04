@@ -225,7 +225,7 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
   }
 
 
-  deleteById(id: number): Promise<void> {
+  async deleteById(id: number): Promise<void> {
     return this.repo.delete(id).then(() => undefined);
   }
 
