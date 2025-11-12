@@ -1,4 +1,4 @@
-  import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/roles.decorator';
@@ -11,7 +11,7 @@ import { Answer } from './entity/answer.entity';
 @ApiTags('Answers')
 @Controller('answers')
 export class AnswerController {
-  constructor(private readonly answerService: AnswerService) {}
+  constructor(private readonly answerService: AnswerService) { }
 
   @Post()
   @Roles('admin', 'user')
@@ -22,26 +22,29 @@ export class AnswerController {
     return sendResponse(answer, 'Answer created successfully', 201);
   }
 
-//   @Put(':id')
-//   @Roles('admin', 'user')
-//   @ApiOperation({ summary: 'Update an answer' })
-//   @ApiResponse({ status: 200, description: 'Answer updated successfully', type: Answer })
-//   async update(
-//     @Param('id', ParseIntPipe) id: number,
-//     @Body() dto: UpdateAnswerDto,
-//   ) {
-//     const answer = await this.answerService.update(id, dto);
-//     return sendResponse(answer, 'Answer updated successfully', 200);
-//   }
+  //   @Put(':id')
+  //   @Roles('admin', 'user')
+  //   @ApiOperation({ summary: 'Update an answer' })
+  //   @ApiResponse({ status: 200, description: 'Answer updated successfully', type: Answer })
+  //   async update(
+  //     @Param('id', ParseIntPipe) id: number,
+  //     @Body() dto: UpdateAnswerDto,
+  //   ) {
+  //     const answer = await this.answerService.update(id, dto);
+  //     return sendResponse(answer, 'Answer updated successfully', 200);
+  //   }
 
   @Get()
   @Roles('admin', 'user')
   @ApiOperation({ summary: 'Get all answers' })
   @ApiResponse({ status: 200, description: 'List of answers', type: [Answer] })
   async findAll(@Query() query: Record<string, any>) {
-    const answers = await this.answerService.findAll(query);
-    return sendResponse(answers, 'Answers retrieved successfully', 200);   
+    // ✅ Pass `true` to include relations (like question + questionType)
+    const answers = await this.answerService.findAll(query, true);
+
+    return sendResponse(answers, 'Answers retrieved successfully', 200);
   }
+
 
   @Get(':id')
   @Roles('admin', 'user')

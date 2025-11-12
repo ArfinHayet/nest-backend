@@ -1,4 +1,4 @@
-import { DeepPartial, FindOptionsWhere, Repository } from 'typeorm';
+import { DeepPartial, FindOptionsWhere, Repository, SelectQueryBuilder } from 'typeorm';
 import { BadRequestException } from '@nestjs/common';
 
 export class BaseRepository<T extends { id?: number; order?: number }> {
@@ -6,6 +6,10 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
 
 
 
+  // ✅ Hook: can be overridden by child repositories
+  protected addCustomJoins(_qb: SelectQueryBuilder<T>): void {
+    // default no-op
+  }
 
   async findAll(
     filters?: FindOptionsWhere<T> & { page?: number; limit?: number },
@@ -19,32 +23,6 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
     delete whereFilters.page;
     delete whereFilters.limit;
 
-    // If relations are not required, handle simple case
-    if (!includeRelations) {
-      const qb = this.repo.createQueryBuilder('entity');
-
-      // Apply filters
-      Object.entries(whereFilters).forEach(([field, value], i) => {
-        if (typeof value === 'string' && value.startsWith(':between')) {
-          const match = value.match(/\[([^\]]+)\]/);
-          if (match) {
-            const [start, end] = match[1].split(',');
-            qb.andWhere(`entity.${field} BETWEEN :start${i} AND :end${i}`, {
-              [`start${i}`]: start.trim(),
-              [`end${i}`]: end.trim(),
-            });
-          }
-        } else {
-          qb.andWhere(`entity.${field} = :val${i}`, { [`val${i}`]: value });
-        }
-      });
-
-      qb.skip((page - 1) * limit).take(limit);
-
-      return qb.getMany();
-    }
-
-    // Case: include relations
     const qb = this.repo.createQueryBuilder('entity');
 
     // Apply filters
@@ -65,20 +43,25 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
 
     // Select main entity columns
     const mainCols = this.repo.metadata.columns.map(
-      col => `entity.${col.propertyName}`
+      col => `entity.${col.propertyName}`,
     );
     qb.select(mainCols);
 
-    // Join relations dynamically
-    this.repo.metadata.relations.forEach(relation => {
-      const relName = relation.propertyName;
+    if (includeRelations) {
+      // Join all direct relations dynamically (except password)
+      this.repo.metadata.relations.forEach(relation => {
+        const relName = relation.propertyName;
 
-      const relCols = relation.inverseEntityMetadata.columns
-        .filter(col => col.propertyName !== 'password')
-        .map(col => `${relName}.${col.propertyName}`);
+        const relCols = relation.inverseEntityMetadata.columns
+          .filter(col => col.propertyName !== 'password')
+          .map(col => `${relName}.${col.propertyName}`);
 
-      qb.leftJoin(`entity.${relName}`, relName).addSelect(relCols);
-    });
+        qb.leftJoin(`entity.${relName}`, relName).addSelect(relCols);
+      });
+
+      // ✅ Call child-specific custom joins
+      this.addCustomJoins(qb);
+    }
 
     // Pagination
     qb.skip((page - 1) * limit).take(limit);
@@ -103,7 +86,7 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
   }
 
 
-    async findAllByField<K extends keyof T>(
+  async findAllByField<K extends keyof T>(
     field: K,
     value: T[K],
   ): Promise<T[] | null> {

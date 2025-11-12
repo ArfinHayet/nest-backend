@@ -10,7 +10,7 @@ export class AnswerService {
 
   async create(dto: CreateAnswerDto): Promise<Answer> {
     // 1️⃣ Check if an answer already exists for the same questionId
-    const existingAnswer = await this.answerRepository.findByField('questionId',dto.questionId)
+    const existingAnswer = await this.answerRepository.findByField('questionId', dto.questionId)
 
     if (existingAnswer) {
       throw new BadRequestException(
@@ -23,9 +23,10 @@ export class AnswerService {
 
 
 
-  async findAll(query: Record<string, any>, includeRelations = true): Promise<Partial<Answer>[]> {
-    return this.answerRepository.findAll(query as any, includeRelations); 
+  async findAll(query: Record<string, any>, includeRelations = false) {
+    return this.answerRepository.findAll(query, includeRelations);
   }
+
 
   async findById(id: number): Promise<Answer | null> {
     return this.answerRepository.findById(id);
