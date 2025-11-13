@@ -38,4 +38,19 @@ export class Appointments {
 
   @Column({ nullable: true })
   signature: string;
+
+  @Column({ nullable: true })
+  diagnosis: string;
+
+  @Column({ type: 'text', nullable: true })
+  notes_from_review: string;
+
+  @Column({ type: 'text', nullable: true })
+  status: string;
+
+  @Column({ type: 'text', nullable: true })
+  metting_status: string;
+
+  @Column({ type: 'int', nullable: true })
+  tries: number;
 }

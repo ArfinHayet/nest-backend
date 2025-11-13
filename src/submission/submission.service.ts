@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { SubmissionRepository } from './entity/submission.repository';
 import { CreateSubmissionDto } from './dto/create-submission.dto';
 import { Submission } from './entity/submission.entity';
@@ -7,7 +7,10 @@ import { DataSource } from 'typeorm';
 
 @Injectable()
 export class SubmissionService {
-  constructor(private readonly submissionRepository: SubmissionRepository, private readonly dataSource: DataSource) { }
+  constructor(
+    private readonly submissionRepository: SubmissionRepository,
+    private readonly dataSource: DataSource,
+  ) {}
 
   async create(dto: CreateSubmissionDto): Promise<Submission> {
     return await this.dataSource.transaction(async (manager) => {
@@ -27,28 +30,37 @@ export class SubmissionService {
       }
 
       return submission;
-    });   
+    });
   }
-
 
   async findAll(query: Record<string, any>, includeRelations: boolean): Promise<Submission[]> {
     return this.submissionRepository.findAll(query as any, includeRelations);
   }
 
-  async findByAssessment(id):Promise<any> {
-    return this.submissionRepository.findByField('assessmentId', id)
+  async findByAssessment(id): Promise<any> {
+    return this.submissionRepository.findByField('assessmentId', id);
   }
 
-  async findByPatientId(id):Promise<any> {
-    return this.submissionRepository.findAllByField('patientId', id)
+  async findByPatientId(id): Promise<any> {
+    return this.submissionRepository.findAllByField('patientId', id);
   }
 
   async updateAssessment(id, dto: Partial<CreateSubmissionDto>): Promise<Submission> {
-    const submission = await this.submissionRepository.findById(id)
+    const submission = await this.submissionRepository.findById(id);
     if (!submission) {
       throw new BadRequestException('Submission not found');
-    } 
+    }
     Object.assign(submission, dto);
-    return this.submissionRepository.create(submission)
-  } 
+    return this.submissionRepository.create(submission);
+  }
+
+  // ✅ DELETE METHOD
+  async deleteAssessment(id: number): Promise<void> {
+    const category = await this.submissionRepository.findById(id);
+    if (!category) {
+      throw new NotFoundException('Question category not found');
+    }
+
+    await this.submissionRepository.deleteById(id);
+  }
 }
