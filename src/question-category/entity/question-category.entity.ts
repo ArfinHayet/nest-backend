@@ -10,5 +10,8 @@ export class QuestionCategory {
   name: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt: Date; 
+
+  @Column({ nullable: true })
+  variant: string; // Foreign key column
 }
