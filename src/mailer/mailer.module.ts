@@ -27,11 +27,11 @@ const templateDir = existsSync(prodPath) ? prodPath : devPath;
       defaults: {
         from: '"NeuroCheck Pro" <arshad@neurocheckpro.com>',
       },
-      template: {
-        dir: templateDir, // ✅ Works in both dist and src
-        adapter: new HandlebarsAdapter(),
-        options: { strict: true }
-      },
+      // template: {
+      //   dir: templateDir, // ✅ Works in both dist and src
+      //   adapter: new HandlebarsAdapter(),
+      //   options: { strict: true }
+      // },
     }),
   ],
   providers: [EmailService],
