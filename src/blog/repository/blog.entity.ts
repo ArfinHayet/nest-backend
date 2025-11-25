@@ -17,6 +17,9 @@ export class Blog {
   @Column({ type: 'text' })
   description: string;
 
+  @Column({ type: 'text', nullable: true })
+  image: string;
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
