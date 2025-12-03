@@ -212,6 +212,19 @@ export class BaseRepository<T extends { id?: number; order?: number }> {
     return this.repo.delete(id).then(() => undefined);
   }
 
+
+
+  /**
+   * Delete entity by any field
+   * @param field - Field name to match
+   * @param value - Value to match
+   * @returns number of deleted entities
+   */
+  async deleteByField<K extends keyof T>(field: K, value: T[K]): Promise<number> {
+    const result = await this.repo.delete({ [field]: value } as any);
+    return result.affected || 0;
+  }
+
   /**
    * Find multiple entities by condition (AND / OR)
    */

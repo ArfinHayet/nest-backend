@@ -24,6 +24,7 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { CustomMailerModule } from './mailer/mailer.module'
 import { QuestionCategoryModule } from './question-category/question-category.module';
 import { MailModule } from './mail/mail.module';
+import { BannerModule } from './banner/banner.module';
 
    
 @Module({
@@ -44,7 +45,7 @@ import { MailModule } from './mail/mail.module';
       }),
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule, CustomMailerModule, QuestionCategoryModule, MailModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule, CustomMailerModule, QuestionCategoryModule, MailModule, BannerModule
   ],
   controllers: [AppController],
   providers: [AppService, ZoomService, CustomMailerModule]

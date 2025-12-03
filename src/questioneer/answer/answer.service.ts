@@ -35,4 +35,9 @@ export class AnswerService {
   async remove(id: number): Promise<void> {
     return this.answerRepository.deleteById(id);
   }
+
+
+    async removeByAssessmentId(assessmentId: number): Promise<number> {
+    return this.answerRepository.deleteByField('assessmentId', assessmentId);
+  }
 }

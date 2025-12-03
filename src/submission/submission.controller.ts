@@ -23,6 +23,7 @@ import { AssessmentService } from 'src/assessment/assessment.service';
 import { QuestionnaireService } from 'src/questioneer/questioneer.service';
 import { AiSummaryService } from 'src/ai-summery/ai-summery.service';
 import { PaymentService } from 'src/payment/payment.service';
+import { AnswerService } from 'src/questioneer/answer/answer.service';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Submissions')
@@ -34,6 +35,7 @@ export class SubmissionController {
     private readonly questionService: QuestionnaireService,
     private readonly aiSummery: AiSummaryService,
     private readonly paymentService: PaymentService,
+    private readonly answerService: AnswerService,
   ) {}
 
   @Post()
@@ -134,6 +136,7 @@ export class SubmissionController {
   async remove(@Param('id') id: number) {
     try {
       const result = await this.submissionService.deleteAssessment(id);
+      await this.answerService.removeByAssessmentId(id);
       return sendResponse(result, 'Assessment submissions deleted successfully', 200);
     } catch (err) {
       throw new BadRequestException(err.message || 'Failed to delete assessment submissions');

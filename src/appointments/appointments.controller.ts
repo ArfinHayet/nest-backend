@@ -32,7 +32,7 @@ export class AppointmentsController {
   @ApiOperation({ summary: 'Get all appointments' })
   @ApiResponse({ status: 200, description: 'List of appointments', type: [Appointments] })
   async findAll(@Query() query: Record<string, any>) {
-    const appointments = await this.appointmentsService.findAll(query);
+    const appointments = await this.appointmentsService.findAll(query);  
 
     if (!appointments || appointments.length === 0) {
       return sendResponse([], 'No appointments found', 200);

@@ -14,7 +14,7 @@ export class AppointmentsService {
   }
 
   async findAll(query) {
-    return this.appointmentRepository.findAll(query as any);
+    return this.appointmentRepository.findAll(query as any,true);
   }
 
   async findById(id: number) {

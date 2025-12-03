@@ -16,7 +16,7 @@ import { TwilioService } from './twilio.service';
     FirebaseModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'my-secret-key',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '30d' },
     }),
   ],
   controllers: [AuthController],

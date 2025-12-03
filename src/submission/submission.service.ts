@@ -55,12 +55,12 @@ export class SubmissionService {
   }
 
   // ✅ DELETE METHOD
-  async deleteAssessment(id: number): Promise<void> {
-    const category = await this.submissionRepository.findById(id);
-    if (!category) {
-      throw new NotFoundException('Question category not found');
-    }
+  async deleteAssessment(id: number): Promise<void> {   
+    // const category = await this.submissionRepository.findById(id);
+    // if (!category) {
+    //   throw new NotFoundException('Question category not found');
+    // }
 
-    await this.submissionRepository.deleteById(id);
+    await this.submissionRepository.deleteByField('assessmentId', id);
   }
 }
