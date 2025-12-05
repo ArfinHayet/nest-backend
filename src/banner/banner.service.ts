@@ -5,7 +5,7 @@ import { UpdateBannerDto } from './dto/update-banner.dto';
 
 @Injectable()
 export class BannerService {
-  constructor(private readonly bannerRepository: BannerRepository) {}
+  constructor(private readonly bannerRepository: BannerRepository) { }
 
   async create(dto: CreateBannerDto) {
     return this.bannerRepository.create(dto);
@@ -21,5 +21,9 @@ export class BannerService {
 
   async update(id: number, dto: UpdateBannerDto) {
     return this.bannerRepository.update(id, dto);
+  }
+
+  async remove(id: number): Promise<void> {
+    return this.bannerRepository.deleteById(id);
   }
 }

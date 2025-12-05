@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { BannerService } from './banner.service';
@@ -14,7 +14,7 @@ import { Roles } from 'src/auth/roles.decorator';
 @ApiTags('Banners')
 @Controller('banners')
 export class BannerController {
-  constructor(private readonly bannerService: BannerService) {}
+  constructor(private readonly bannerService: BannerService) { }
 
   // 🔹 Create Banner
   @Post()
@@ -26,7 +26,6 @@ export class BannerController {
     const banner = await this.bannerService.create(dto);
     return sendResponse(banner, 'Banner created successfully', 201);
   }
-
   // 🔹 Get All
   @Get()
   @Roles('admin')
@@ -60,5 +59,16 @@ export class BannerController {
   async update(@Param('id') id: number, @Body() dto: UpdateBannerDto) {
     const banner = await this.bannerService.update(+id, dto);
     return sendResponse(banner, 'Banner updated successfully', 200);
+  }
+
+
+  // 🔹 Remove
+  @Delete(':id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Delete banner' })
+  @ApiResponse({ status: 200 })
+  async remove(@Param('id') id: number) {
+    await this.bannerService.remove(+id);
+    return sendResponse(null, 'Banner deleted successfully', 200);
   }
 }
