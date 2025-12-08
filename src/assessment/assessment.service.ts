@@ -69,4 +69,8 @@ export class AssessmentService {
     return this.assessmentRepository.deleteById(id);
   }
 
+  async update(id: number, dto: Partial<CreateAssessmentDto>): Promise<Assessment> {
+    return this.assessmentRepository.update(id, dto);
+  }
+
 }

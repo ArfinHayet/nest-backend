@@ -72,4 +72,13 @@ export class CreateAppointmentDto {
   @IsOptional()
   @IsString()
   signature?: string;
+
+
+  @IsOptional()
+  @IsString()
+  feedback: string;
+
+  @IsOptional()
+  @IsString()
+  diagosis_recommendation: string;
 }

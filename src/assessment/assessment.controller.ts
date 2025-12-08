@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body } from '@nestjs/common';
+import { Controller, Post, Get, Body, Patch } from '@nestjs/common';
 import { Delete, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AssessmentService } from './assessment.service';
@@ -13,11 +13,11 @@ import { Query } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
 
 
-@UseGuards(AuthGuard('jwt'),RolesGuard)
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Assessments')
 @Controller('assessments')
 export class AssessmentController {
-  constructor(private readonly assessmentService: AssessmentService) {}
+  constructor(private readonly assessmentService: AssessmentService) { }
 
   @Post()
   @Roles('admin')
@@ -25,17 +25,17 @@ export class AssessmentController {
   @ApiResponse({ status: 201, description: 'Assessment created', type: Assessment })
   async create(@Body() dto: CreateAssessmentDto) {
     const assessment = await this.assessmentService.create(dto);
-    return sendResponse(assessment,'assessment created successfully',201)  
+    return sendResponse(assessment, 'assessment created successfully', 201)
   }
- 
-  @Get() 
-  @Roles('admin','user','clinician')
+
+  @Get()
+  @Roles('admin', 'user', 'clinician')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findAll(@Query() query: Record<string, any>) {
-    const assessments = await this.assessmentService.findAll(query); 
-    return sendResponse(assessments,'assessments retrieved successfully',200)
-  }   
+    const assessments = await this.assessmentService.findAll(query);
+    return sendResponse(assessments, 'assessments retrieved successfully', 200)
+  }
 
   @Delete(':id')
   @Roles('admin')
@@ -48,12 +48,23 @@ export class AssessmentController {
   }
 
 
-  @Get('count') 
-  @Roles('admin','user','clinician')
+  @Patch(':id')
+  @Roles('admin', 'user', 'clinician')
+  @ApiOperation({ summary: 'Update an assessment by ID' })
+  @ApiResponse({ status: 200, description: 'Assessment updated', type: Assessment })
+  async update(@Param('id') id: number, @Body() dto: Partial<CreateAssessmentDto>) {
+    const assessment = await this.assessmentService.update(+id, dto);
+    return sendResponse(assessment, 'Assessment updated successfully', 200);
+  }
+
+
+
+  @Get('count')
+  @Roles('admin', 'user', 'clinician')
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findCount(@Query() query: Record<string, any>) {
     const assessments = await this.assessmentService.findCount(query);
-    return sendResponse(assessments,'assessment count retrieved successfully',200)
-  }   
+    return sendResponse(assessments, 'assessment count retrieved successfully', 200)
+  }
 }
