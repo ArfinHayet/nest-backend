@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Delete } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -53,7 +53,7 @@ export class UsersController {
 
 
   // ✅ Update user endpoint
-  @Roles('admin','user','clinician')
+  @Roles('admin', 'user', 'clinician')
   @Put(':id')
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async update(
@@ -62,6 +62,16 @@ export class UsersController {
   ) {
     const updatedUser = await this.usersService.update(userId, updateUserDto);
     return sendResponse(updatedUser, 'User updated successfully', 200);
+  }
+
+
+  // ✅ Delete user endpoint
+  @Roles('admin')
+  @Delete(':id')
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  async remove(@Param('id', ParseIntPipe) userId: number) {
+    await this.usersService.remove(userId);
+    return sendResponse(null, 'User deleted successfully', 200);
   }
 
 }

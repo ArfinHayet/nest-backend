@@ -53,4 +53,9 @@ export class UsersService {
     // hide password before returning
     return omit(user, ['password']);
   }
+
+
+  async remove(id: number): Promise<void> {
+    return this.userRepo.deleteById(id);
+  }
 }
