@@ -20,4 +20,8 @@ export class CreatePatientAppointmentDto {
   @IsOptional()
   @IsInt()
   tries?: number;
+
+  @IsOptional()
+  @IsString()
+  description: string;
 }

@@ -59,4 +59,5 @@ export class Appointments {
 
   @Column({ type: 'text', nullable: true })
   diagosis_recommendation: string;
+
 }

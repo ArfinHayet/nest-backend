@@ -39,4 +39,7 @@ export class PatientAppointment {
   @ManyToOne(() => User, (User) => User.id, { onDelete: 'SET NULL' })
   @JoinColumn({ name: 'clinicianId' })
   clinician: User;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
 }
