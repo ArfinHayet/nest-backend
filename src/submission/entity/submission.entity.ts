@@ -84,4 +84,7 @@ export class Submission {
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
+
+  @Column({ type: 'text', nullable: true })
+  clinician_approved: string;
 }
