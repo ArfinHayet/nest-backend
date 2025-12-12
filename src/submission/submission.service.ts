@@ -10,7 +10,7 @@ export class SubmissionService {
   constructor(
     private readonly submissionRepository: SubmissionRepository,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async create(dto: CreateSubmissionDto): Promise<Submission> {
     return await this.dataSource.transaction(async (manager) => {
@@ -55,7 +55,7 @@ export class SubmissionService {
   }
 
   // ✅ DELETE METHOD
-  async deleteAssessment(id: number): Promise<void> {   
+  async deleteAssessment(id: number): Promise<void> {
     // const category = await this.submissionRepository.findById(id);
     // if (!category) {
     //   throw new NotFoundException('Question category not found');
@@ -63,4 +63,11 @@ export class SubmissionService {
 
     await this.submissionRepository.deleteByField('assessmentId', id);
   }
+
+
+  async countByClinicianId(clinicianId: number) {
+  return this.submissionRepository.countByClinician(clinicianId);
+}
+
+
 }

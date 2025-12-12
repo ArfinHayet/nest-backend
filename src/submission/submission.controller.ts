@@ -24,6 +24,7 @@ import { QuestionnaireService } from 'src/questioneer/questioneer.service';
 import { AiSummaryService } from 'src/ai-summery/ai-summery.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { AnswerService } from 'src/questioneer/answer/answer.service';
+import { UsersService } from 'src/users/users.service';
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @ApiTags('Submissions')
@@ -36,49 +37,81 @@ export class SubmissionController {
     private readonly aiSummery: AiSummaryService,
     private readonly paymentService: PaymentService,
     private readonly answerService: AnswerService,
-  ) {}
-
+    private readonly usersService: UsersService
+  ) { }
   @Post()
   @Roles('admin', 'user', 'clinician')
   @ApiOperation({ summary: 'Create a new submission' })
-  @ApiResponse({ status: 201, description: 'Submission created', type: Submission })
+  @ApiResponse({
+    status: 201,
+    description: 'Submission created',
+    type: Submission,
+  })
   async create(@Body() dto: any): Promise<Submission> {
     const existing = await this.assessmentService.findById(dto.assessmentId);
     if (!existing) {
       throw new BadRequestException('Invalid assessmentId');
     }
 
-    // --- scoring rules ---
-    const scoreIfAgree = new Set<number>([1, 7, 8, 10]);
-    const scoreIfDisagree = new Set<number>([2, 3, 4, 5, 6, 9]);
+    // ----------------------------------------
+    // ⭐ AUTO-ASSIGN CLINICIAN (LEAST LOADED)
+    // ----------------------------------------
+    const clinicians = await this.usersService.findAll({ role: 'clinician' });
 
-    if (existing && existing.type === 'free') {
-      let score = 0;
-      for (let i = 0; i < dto.answers.length; i++) {
-        const qNum = i + 1;
-        const answerText = dto.answers[i].answer;
-
-        if (
-          scoreIfAgree.has(qNum) &&
-          (answerText === 'Definitely agree' || answerText === 'Slightly agree')
-        ) {
-          score++;
-        }
-
-        if (
-          scoreIfDisagree.has(qNum) &&
-          (answerText === 'Definitely disagree' || answerText === 'Slightly disagree')
-        ) {
-          score++;
-        }
-      }
-      dto.score = score;
+    if (!clinicians || clinicians.length === 0) {
+      throw new BadRequestException('No clinicians available');
     }
 
+    // calculate submission load for each clinician
+    const clinicianLoad = [];
+
+    for (const c of clinicians) {
+      const count = await this.submissionService.countByClinicianId(c.id);
+      clinicianLoad.push({ id: c.id, count });
+    }
+
+    // pick clinician with lowest submission count
+    clinicianLoad.sort((a, b) => a.count - b.count);
+
+    const selectedClinician = clinicianLoad[0];
+    dto.clinicianId = selectedClinician.id;
+
+    // -----------------------------
+    // ⭐ Flutter-Style Scoring Logic
+    // -----------------------------
+    if (dto.answers?.length > 0) {
+      const optionScore: Record<string, number> = {
+        "Never": 0,
+        "Rarely": 1,
+        "Sometimes": 2,
+        "Often": 3,
+        "Very Often": 4,
+      };
+
+      let totalScore = 0;
+
+      for (const ans of dto.answers) {
+        const score = optionScore[ans.answer] ?? 0;
+        totalScore += score;
+      }
+
+      const totalPossibleScore = dto.answers.length * 4;
+
+      dto.score = totalScore;
+      dto.possible_score = totalPossibleScore;
+
+      dto.passed = totalScore > 42 ? true : false;
+    }
+
+    // -------------------------------------------------------
+    // ⭐ Premium Assessment: Build dataset + AI summary logic
+    // -------------------------------------------------------
     if (dto.answers?.length > 0 && existing.type === 'premium') {
       const dataSet = [];
+
       for (const ans of dto.answers) {
         const questionData = await this.questionService.findById(ans.questionId);
+
         if (questionData) {
           dataSet.push({
             question: questionData.questions,
@@ -91,17 +124,35 @@ export class SubmissionController {
       dto.paidAmount = priceInfo ? priceInfo.unit_amount.toString() : '0';
 
       // generate AI summary
-      const summary = await this.aiSummery.summarizeAll(dataSet);
-      dto.summary = summary;
+      try {
+        const summary = await this.aiSummery.summarizeAll(dataSet);
+        dto.summary = summary;
+      } catch (err) {
+        dto.summary = '';
+        console.error('AI summary generation failed:', err.message);
+      }
     }
 
-    // --- Default field values ---
+    // -------------------------------
+    // ⭐ Default non-premium fields
+    // -------------------------------
     dto.status = 'pending';
     dto.ratings = 0;
     dto.additionalInfo = '';
 
-    return this.submissionService.create(dto);
+    // -------------------------------
+    // ⭐ Create Submission
+    // -------------------------------
+    try {
+      return this.submissionService.create(dto);
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestException(
+        err.message || 'Failed to create submission',
+      );
+    }
   }
+
 
   @Put(':id')
   @Roles('admin', 'user', 'clinician')

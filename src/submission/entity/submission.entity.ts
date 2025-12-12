@@ -9,13 +9,15 @@ import {
 import { Patient } from 'src/patient/patient.entity';
 import { Assessment } from 'src/assessment/assessment.entity';
 import { User } from 'src/users/user.entity';
-import { IsInt } from 'class-validator';
 
 @Entity()
 export class Submission {
   @PrimaryGeneratedColumn()
   id: number;
 
+  // ------------------------
+  // Patient Relation
+  // ------------------------
   @ManyToOne(() => Patient, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'patientId' })
   patient: Patient;
@@ -23,6 +25,9 @@ export class Submission {
   @Column()
   patientId: number;
 
+  // ------------------------
+  // Assessment Relation
+  // ------------------------
   @ManyToOne(() => Assessment, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'assessmentId' })
   assessment: Assessment;
@@ -30,6 +35,9 @@ export class Submission {
   @Column()
   assessmentId: number;
 
+  // ------------------------
+  // User who submitted (existing)
+  // ------------------------
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
@@ -37,32 +45,43 @@ export class Submission {
   @Column()
   userId: number;
 
+  // ------------------------
+  // Clinician = User Relation (NEW)
+  // ------------------------
+  @ManyToOne(() => User, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'clinicianId' })
+  clinician: User;
+
+  @Column({ nullable: true })
+  clinicianId: number;
+
+  // ------------------------
+  // Fields
+  // ------------------------
   @Column({ type: 'int', nullable: true })
   score: number;
+
+  @Column({ type: 'int', nullable: true })
+  possible_score: number;
 
   @Column({ type: 'text', nullable: true })
   summary: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
-  status: string; // new field: e.g., 'pending', 'completed'
+  status: string;
 
   @Column({ type: 'float', nullable: true })
-  ratings: number; // new field: numeric rating
+  ratings: number;
 
   @Column({ type: 'text', nullable: true })
-  additionalInfo: string; // new field: extra notes
-
-  @Column({ type: 'int', nullable: true })
-  clinicianId: number;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-
+  additionalInfo: string;
 
   @Column({ type: 'text', nullable: true })
   paidAmount: string;
 
-
   @Column({ type: 'text', nullable: true })
   questionType: string;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 }
