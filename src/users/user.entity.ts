@@ -1,5 +1,12 @@
 // src/users/user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  BeforeInsert,
+  BeforeUpdate,
+  CreateDateColumn,
+} from 'typeorm';
 import { Exclude } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 
@@ -20,44 +27,48 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   password: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   age: number;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   country: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   state: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   postCode: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   street: string;
 
   @Column()
   role: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   knowHow: string;
 
   @Column({ nullable: true })
   hcpcTitle: string;
 
   @Column({ nullable: true })
-  regNo: string;   // ✅ HCPC Registration Number
+  regNo: string;
 
   @Column({ nullable: true })
-  practiceName: string; // ✅ Practice Name
+  practiceName: string;
 
   @Column({ nullable: true })
-  certification: string; // ✅ Certification file path or URL
+  certification: string;
 
   @Column({ nullable: true })
-  firebaseUid : string
+  firebaseUid: string;
 
-  @Column({nullable: true })
-  image: string
+  @Column({ nullable: true })
+  image: string;
+
+  // ✅ Automatically set on insert
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
 
   // Hash password before inserting/updating
   @BeforeInsert()
