@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Patch } from '@nestjs/common';
+import { Controller, Post, Get, Body, Patch, Put } from '@nestjs/common';
 import { Delete, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AssessmentService } from './assessment.service';
@@ -48,7 +48,7 @@ export class AssessmentController {
   }
 
 
-  @Patch(':id')
+  @Put(':id')
   @Roles('admin', 'user', 'clinician')
   @ApiOperation({ summary: 'Update an assessment by ID' })
   @ApiResponse({ status: 200, description: 'Assessment updated', type: Assessment })
