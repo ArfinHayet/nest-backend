@@ -32,7 +32,7 @@ async function bootstrap() {
   app.use('/api/webhooks/calendly', bodyParser.raw({ type: 'application/json' }));
 
   // ✅ Prefix all routes with /api
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
 
   // Swagger setup at /api-docs (outside /api prefix)
   const config = new DocumentBuilder()
