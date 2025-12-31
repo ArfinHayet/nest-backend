@@ -83,8 +83,22 @@ export class Submission {
   questionType: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
+  createdAt: Date; 
 
   @Column({ type: 'text', nullable: true })
   clinician_approved: string;
+
+
+
+  @Column({ type: 'text', nullable: true })
+  reviewer_name: string;
+
+  @Column({ type: 'text', nullable: true })
+  reviewer_email: string;
+
+  @Column({ type: 'text', nullable: true })
+  reviewer_occupation: string;
+
+  @Column({ type: 'text', nullable: true })
+  reviewer_relation: string;
 }
