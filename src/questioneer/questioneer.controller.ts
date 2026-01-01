@@ -1,8 +1,8 @@
-import { Controller, Post, Get, Body, Put, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Get, Body, Put, Param, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes } from '@nestjs/swagger';
 import { QuestionnaireService } from '../questioneer/questioneer.service';
-import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
+import { AnswerType, CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
 import { UpdateQuestionnaireDto } from './dto/update-questionnaire.dto';
 import { Questionnaire } from '../questioneer/questioneer.entity';
 import { sendResponse } from 'src/utils/send-response';
@@ -10,6 +10,11 @@ import { UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/auth/roles.decorator';
 import { Query } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterFile } from 'multer';
+import { Readable } from 'stream';
+import csv from 'csv-parser';
+
 
 @UseGuards(AuthGuard('jwt'))
 @ApiTags('Questionnaires')
@@ -25,6 +30,60 @@ export class QuestionnaireController {
     console.log(dto)
     const questions = await this.questionnaireService.create(dto);
     return sendResponse(questions, "Questionnaire created successfully", 201)
+  }
+
+
+
+  @Post('bulk-upload')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Bulk upload questionnaires using CSV' })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 201, description: 'Questionnaires created successfully' })
+  @UseInterceptors(FileInterceptor('file'))
+  async bulkUpload(@UploadedFile() file: MulterFile) {
+    if (!file) {
+      throw new BadRequestException('CSV file is required');
+    }
+
+    const dtos: CreateQuestionnaireDto[] = [];
+
+    // 1️⃣ Parse CSV
+    await new Promise<void>((resolve, reject) => {
+      Readable.from(file.buffer)
+        .pipe(csv())
+        .on('data', (row) => {
+          dtos.push({
+            assessmentId: Number(row.assessmentId),
+            questions: row.questions,
+            order: Number(row.order),
+            answerType: row.answerType as AnswerType,
+            options: row.options
+              ? row.options.split('|').map((o: string) => o.trim())
+              : undefined,
+            questiontypeid: row.questiontypeid
+              ? Number(row.questiontypeid)
+              : undefined,
+            variant: row.variant || undefined,
+          });
+        })
+        .on('end', resolve)
+        .on('error', reject);
+    });
+
+    // 2️⃣ Loop & call existing create() service
+    const createdQuestions = [];
+
+    for (const dto of dtos) {
+      console.log('Creating questionnaire:', dto);
+      const question = await this.questionnaireService.create(dto);
+      createdQuestions.push(question);
+    }
+
+    return sendResponse(
+      createdQuestions,
+      'Questionnaires created successfully',
+      201,
+    );
   }
 
 
@@ -60,3 +119,5 @@ export class QuestionnaireController {
     return sendResponse(null, `Questionnaire with id ${id} deleted successfully`, 200);
   }
 }
+
+
