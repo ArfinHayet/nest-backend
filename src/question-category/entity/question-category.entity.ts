@@ -23,4 +23,7 @@ export class QuestionCategory {
 
   @Column({ nullable: true })
   assessmentId: number; // Foreign key column
+
+  @Column({ nullable: true })
+  order: number;
 }

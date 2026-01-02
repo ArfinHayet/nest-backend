@@ -11,7 +11,7 @@ export class QuestionCategoryService {
   ) {}
 
   async create(createQuestionCategoryDto: CreateQuestionCategoryDto): Promise<QuestionCategory> {
-    return await this.questionCategoryRepository.create(createQuestionCategoryDto);
+    return await this.questionCategoryRepository.create(createQuestionCategoryDto as any);
   }
 
   async findAll(query?: any) {
@@ -23,7 +23,7 @@ export class QuestionCategoryService {
   }
 
   async update(id: number, data: Partial<CreateQuestionCategoryDto>) {
-    return this.questionCategoryRepository.update(id, data);
+    return this.questionCategoryRepository.update(id, data as any);
   }
 
   async findByName(name: string) {
