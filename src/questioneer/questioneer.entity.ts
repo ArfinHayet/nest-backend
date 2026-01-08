@@ -30,8 +30,19 @@ export class Questionnaire {
   @Column({ default: 0 })
   order: number;
 
-  @Column('text', { array: true, nullable: true })
-  options: string[];
+  // @Column('text', { array: true, nullable: true })
+  // options: string[];
+
+   @Column({ 
+    type: 'json', 
+    nullable: true,
+    name: 'options_with_score'  // column name
+  })
+  options: {  
+    label: string;
+    score: number;
+  }[];
+
 
   @Column({ type: 'text', nullable: true })
   answerType: string;

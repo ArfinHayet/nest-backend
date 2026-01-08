@@ -12,6 +12,16 @@ export enum QuestionVariant {
   EXTERNAL = 'external',
 }
 
+export class OptionWithScore {
+  @ApiProperty({ example: 'Yes' })
+  @IsString()
+  label: string;
+
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  score: number;
+}
+
 
 export class CreateQuestionnaireDto {
   @ApiProperty({
@@ -44,15 +54,30 @@ export class CreateQuestionnaireDto {
   answerType: AnswerType;
 
   // ✅ New field
-  @ApiProperty({
+//   @ApiProperty({
+//     description: 'Available options for the question (used if answerType is MultipleChoice)',
+//     example: ['Option A', 'Option B', 'Option C'],
+//     required: false,
+//   })
+//   @IsArray()
+//   @IsString({ each: true })
+//   @IsOptional()
+//   // options?: string[];
+//  options?: { label: string; score: number }[];
+
+   @ApiProperty({
     description: 'Available options for the question (used if answerType is MultipleChoice)',
-    example: ['Option A', 'Option B', 'Option C'],
-    required: false,   
+    example: [
+      { label: 'Yes', score: 1 },
+      { label: 'No', score: 0 }
+    ],
+     required: false,
+        type: [OptionWithScore],
+
   })
   @IsArray()
-  @IsString({ each: true })
   @IsOptional()
-  options?: string[];
+  options?: OptionWithScore[];
 
 
   @IsNumber()

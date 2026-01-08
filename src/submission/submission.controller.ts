@@ -81,29 +81,61 @@ export class SubmissionController {
     // -----------------------------
     // ⭐ Flutter-Style Scoring Logic
     // -----------------------------
-    if (dto.answers?.length > 0) {
-      const optionScore: Record<string, number> = {
-        "Never": 0,
-        "Rarely": 1,
-        "Sometimes": 2,
-        "Often": 3,
-        "Very Often": 4,
-      };
+    // if (dto.answers?.length > 0) {
+    //   const optionScore: Record<string, number> = {
+    //     "Never": 0,
+    //     "Rarely": 1,
+    //     "Sometimes": 2,
+    //     "Often": 3,
+    //     "Very Often": 4,
+    //   };
 
-      let totalScore = 0;
+    //   let totalScore = 0;
 
-      for (const ans of dto.answers) {
-        const score = optionScore[ans.answer] ?? 0;
-        totalScore += score;
-      }
+    //   for (const ans of dto.answers) {
+    //     const score = optionScore[ans.answer] ?? 0;
+    //     totalScore += score;
+    //   }
 
-      const totalPossibleScore = dto.answers.length * 4;
+    //   const totalPossibleScore = dto.answers.length * 4;
 
-      dto.score = totalScore;
-      dto.possible_score = totalPossibleScore;
+    //   dto.score = totalScore;
+    //   dto.possible_score = totalPossibleScore;
 
-      dto.passed = totalScore > 42 ? true : false;
+    //   dto.passed = totalScore > 42 ? true : false;
+    // }
+
+
+     // -------------------------------------------------------
+    // ⭐ NEW SCORING LOGIC: Calculate score from options
+    // -------------------------------------------------------
+   if (dto.answers?.length > 0) {
+  let totalScore = 0;
+  let totalPossibleScore = 0;
+
+  for (const ans of dto.answers) {
+    // 1️⃣ frontend provided score
+    totalScore += Number(ans.score || 0);
+
+    // 2️⃣ still need max score from backend (safety)
+    const questionData = await this.questionService.findById(ans.questionId);
+
+    if (questionData?.options?.length > 0) {
+      const maxScore = Math.max(
+        ...questionData.options.map(opt => Number(opt.score))
+      );
+      totalPossibleScore += maxScore;
     }
+  }
+
+  dto.score = totalScore;
+  dto.possible_score = totalPossibleScore;
+
+  //  upto 40% true
+  const percentage = (totalScore / totalPossibleScore) * 100;
+
+  dto.status = percentage >= 40 ? false : true;
+}
 
     // -------------------------------------------------------
     // ⭐ Premium Assessment: Build dataset + AI summary logic
@@ -118,6 +150,7 @@ export class SubmissionController {
           dataSet.push({
             question: questionData.questions,
             answer: ans.answer,
+             score: ans.score || 0,
           });
         }
       }
