@@ -52,14 +52,35 @@ export class QuestionnaireController {
       Readable.from(file.buffer)
         .pipe(csv())
         .on('data', (row) => {
+           // Parse options with scores
+        let optionsWithScores = undefined;
+        
+        if (row.options) {
+          try {
+            // CSV format: "Yes:1|No:0"
+            optionsWithScores = row.options
+              .split('|')
+              .map((opt: string) => {
+                const [label, score] = opt.trim().split(':');
+                return {
+                  label: label.trim(),
+                  score: parseFloat(score || '0'),
+                };
+              });
+          } catch (err) {
+            console.error('Failed to parse options:', err);
+          }
+        }
           dtos.push({
             assessmentId: Number(row.assessmentId),
             questions: row.questions,
             order: Number(row.order),
             answerType: row.answerType as AnswerType,
-            options: row.options
-              ? row.options.split('|').map((o: string) => o.trim())
-              : undefined,
+            // options: row.options
+            //   ? row.options.split('|').map((o: string) => o.trim())
+            //   : undefined,
+                      options: optionsWithScores, 
+
             questiontypeid: row.questiontypeid
               ? Number(row.questiontypeid)
               : undefined,

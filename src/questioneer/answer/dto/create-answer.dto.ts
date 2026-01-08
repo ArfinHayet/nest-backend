@@ -1,6 +1,6 @@
 // src/question/dto/create-answer.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsOptional } from 'class-validator';
 
 export class CreateAnswerDto {
   @ApiProperty({ example: 1, description: 'ID of the question being answered' })
@@ -22,6 +22,15 @@ export class CreateAnswerDto {
   @IsString()
   @IsNotEmpty()
   answer: string; 
+
+  @ApiProperty({
+  example: 1,
+  description: 'Score derived from selected option',
+  required: false,
+})
+@IsOptional()
+@IsNumber()
+score?: number;
 
   @ApiProperty({ example: '2', description: 'Assessment Id' })
   @IsNumber()

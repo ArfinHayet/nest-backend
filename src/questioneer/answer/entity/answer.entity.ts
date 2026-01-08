@@ -19,6 +19,10 @@ export class Answer {
     @Column({ type: 'text' })
     answer: string;
 
+    @Column({ type: 'int', default: 0 })
+    score: number;
+
+
     @ManyToOne(() => User, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'userId' })
     user: User;

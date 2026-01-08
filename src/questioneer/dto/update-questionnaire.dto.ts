@@ -16,4 +16,6 @@ export class UpdateQuestionnaireDto {
   @IsOptional()
   @IsString()
   answerType?: string;
+
+  
 }

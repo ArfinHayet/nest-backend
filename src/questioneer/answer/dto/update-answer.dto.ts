@@ -6,4 +6,8 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 export class UpdateAnswerDto extends PartialType(CreateAnswerDto) {
   @ApiPropertyOptional({ example: 'Updated answer text', description: 'Optional updated answer' })
   answer?: string;
+
+  @ApiPropertyOptional({ example: 2 })
+score?: number;
+
 }
