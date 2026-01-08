@@ -14,9 +14,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterFile } from 'multer';
 import { Readable } from 'stream';
 import csv from 'csv-parser';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Public } from 'src/public/public.decorator';
 
 
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 @ApiTags('Questionnaires')
 @Controller('questionnaires')
 export class QuestionnaireController {
@@ -101,7 +103,7 @@ export class QuestionnaireController {
 
 
   @Get()
-  @Roles('admin', 'user')
+  @Public()
   @ApiOperation({ summary: 'Get all questionnaires' })
   @ApiResponse({ status: 200, description: 'List of questionnaires', type: [Questionnaire] })
   async findAll(@Query() query: Record<string, any>) {

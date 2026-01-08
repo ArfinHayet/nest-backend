@@ -11,9 +11,11 @@ import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { Query } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common';
+import { Public } from 'src/public/public.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Assessments')
 @Controller('assessments')
 export class AssessmentController {
@@ -29,7 +31,7 @@ export class AssessmentController {
   }
 
   @Get()
-  @Roles('admin', 'user', 'clinician')
+  @Public()
   @ApiOperation({ summary: 'Get all assessments' })
   @ApiResponse({ status: 200, description: 'List of assessments', type: [Assessment] })
   async findAll(@Query() query: Record<string, any>) {

@@ -25,8 +25,10 @@ import { AiSummaryService } from 'src/ai-summery/ai-summery.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { AnswerService } from 'src/questioneer/answer/answer.service';
 import { UsersService } from 'src/users/users.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Public } from 'src/public/public.decorator';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Submissions')
 @Controller('submissions')
 export class SubmissionController {
@@ -155,7 +157,7 @@ export class SubmissionController {
 
 
   @Put(':id')
-  @Roles('admin', 'user', 'clinician')
+  @Public()
   @ApiOperation({ summary: 'Update an existing submission' })
   @ApiResponse({ status: 200, description: 'Submission updated', type: Submission })
   async update(
