@@ -145,8 +145,8 @@ export class SubmissionController {
       ? (totalScore / totalPossibleScore) * 100 
       : 0;
 
-    // If score >= 40% → status2 = "false", else "true"
-    dto.status2 = percentage >= 40 ? 'false' : 'true';
+    // If score >= 40% → status2 = "true", else "false"
+    dto.status2 = percentage >= 40 ? 'true' : 'false';
   }
 
     // -------------------------------------------------------
