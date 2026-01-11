@@ -65,7 +65,7 @@ export class Submission {
   possible_score: number;
 
   @Column({ type: 'text', nullable: true })
-  status2: string;
+  paid_status: string;
 
   @Column({ type: 'text', nullable: true })
   summary: string;
@@ -90,7 +90,6 @@ export class Submission {
 
   @Column({ type: 'text', nullable: true })
   clinician_approved: string;
-
 
 
   @Column({ type: 'text', nullable: true })
