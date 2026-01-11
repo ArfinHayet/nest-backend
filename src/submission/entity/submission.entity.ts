@@ -65,6 +65,9 @@ export class Submission {
   possible_score: number;
 
   @Column({ type: 'text', nullable: true })
+  status2: string;
+
+  @Column({ type: 'text', nullable: true })
   summary: string;
 
   @Column({ type: 'varchar', length: 50, nullable: true })

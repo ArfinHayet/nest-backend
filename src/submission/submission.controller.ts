@@ -107,33 +107,45 @@ export class SubmissionController {
      // -------------------------------------------------------
     // ⭐ NEW SCORING LOGIC: Calculate score from options
     // -------------------------------------------------------
-   if (dto.answers?.length > 0) {
-  let totalScore = 0;
-  let totalPossibleScore = 0;
+  if (dto.answers?.length > 0) {
+    let totalScore = 0;
+    let totalPossibleScore = 0;
 
-  for (const ans of dto.answers) {
-    // 1️⃣ frontend provided score
-    totalScore += Number(ans.score || 0);
+    for (const ans of dto.answers) {
+      // Fetch question to get options with scores
+      const questionData = await this.questionService.findById(ans.questionId);
 
-    // 2️⃣ still need max score from backend (safety)
-    const questionData = await this.questionService.findById(ans.questionId);
+      if (questionData && questionData.options) {
+        // Find the selected option by matching answer label
+        const selectedOption = questionData.options.find(
+          (opt) => opt.label === ans.answer
+        );
 
-    if (questionData?.options?.length > 0) {
-      const maxScore = Math.max(
-        ...questionData.options.map(opt => Number(opt.score))
-      );
-      totalPossibleScore += maxScore;
+        if (selectedOption) {
+          totalScore += Number(selectedOption.score);
+          ans.score = Number(selectedOption.score); // Save score in answer
+        } else {
+          console.warn(`No matching option found for answer: "${ans.answer}" in question ${ans.questionId}`);
+          ans.score = 0;
+        }
+
+        // Calculate max possible score for this question
+        const maxScore = Math.max(...questionData.options.map(opt => Number(opt.score)));
+        totalPossibleScore += maxScore;
+      }
     }
+
+    dto.score = totalScore;
+    dto.possible_score = totalPossibleScore;
+
+    // Calculate percentage and set status
+    const percentage = totalPossibleScore > 0 
+      ? (totalScore / totalPossibleScore) * 100 
+      : 0;
+
+    // If score >= 40% → status2 = "false", else "true"
+    dto.status2 = percentage >= 40 ? 'false' : 'true';
   }
-
-  dto.score = totalScore;
-  dto.possible_score = totalPossibleScore;
-
-  //  upto 40% true
-  const percentage = (totalScore / totalPossibleScore) * 100;
-
-  dto.status = percentage >= 40 ? false : true;
-}
 
     // -------------------------------------------------------
     // ⭐ Premium Assessment: Build dataset + AI summary logic
