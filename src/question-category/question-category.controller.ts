@@ -8,8 +8,10 @@ import { sendResponse } from 'src/utils/send-response';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Public } from 'src/public/public.decorator';
 
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @ApiTags('Question Categories')
 @Controller('question-categories')
 export class QuestionCategoryController {
@@ -41,7 +43,7 @@ export class QuestionCategoryController {
   }
 
   @Get()
-  @Roles('admin', 'user')
+  @Public()
   @ApiOperation({ summary: 'Get all question categories' })
   @ApiResponse({ status: 200, description: 'List of question categories', type: [QuestionCategory] })
   async findAll(@Query() query: Record<string, any>) {
