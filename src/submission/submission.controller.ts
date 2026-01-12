@@ -146,7 +146,7 @@ export class SubmissionController {
       : 0;
 
     // If score >= 40% → status2 = "true", else "false"
-    dto.status2 = percentage >= 40 ? 'true' : 'false';
+    dto.paid_status = percentage >= 40 ? 'true' : 'false';
   }
 
     // -------------------------------------------------------
