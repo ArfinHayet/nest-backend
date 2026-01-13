@@ -2,7 +2,7 @@ import { Controller, Post, Get, Body, Put, Param, ParseIntPipe, UseInterceptors,
 import { Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes } from '@nestjs/swagger';
 import { QuestionnaireService } from '../questioneer/questioneer.service';
-import { AnswerType, CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
+import { AnswerType, CreateQuestionnaireDto, OptionWithScore } from './dto/create-questionnaire.dto';
 import { UpdateQuestionnaireDto } from './dto/update-questionnaire.dto';
 import { Questionnaire } from '../questioneer/questioneer.entity';
 import { sendResponse } from 'src/utils/send-response';
@@ -34,7 +34,11 @@ export class QuestionnaireController {
     return sendResponse(questions, "Questionnaire created successfully", 201)
   }
 
-
+// csv format
+// assessmentId,questions,order,answerType,options,questiontypeid,variant
+// 1,"Do you exercise regularly?",1,MultipleChoice,"Yes:1|No:0",1,internal
+// 2,"How many hours do you sleep?",2,Text,,2,internal
+// 3,"Are you satisfied?",3,Yes/No,"Yes:1|No:0|Maybe:0.5",1,external
 
   @Post('bulk-upload')
   @Roles('admin')
@@ -55,24 +59,49 @@ export class QuestionnaireController {
         .pipe(csv())
         .on('data', (row) => {
            // Parse options with scores
-        let optionsWithScores = undefined;
+        // let optionsWithScores = undefined;
         
-        if (row.options) {
-          try {
-            // CSV format: "Yes:1|No:0"
-            optionsWithScores = row.options
-              .split('|')
-              .map((opt: string) => {
-                const [label, score] = opt.trim().split(':');
-                return {
-                  label: label.trim(),
-                  score: parseFloat(score || '0'),
-                };
-              });
-          } catch (err) {
-            console.error('Failed to parse options:', err);
-          }
-        }
+       // Parse options with scores
+          let optionsWithScores: OptionWithScore[] | undefined = undefined;
+          
+          if (row.options && row.options.trim() !== '') {
+            try {
+              // CSV format: "Yes:1|No:0"
+              optionsWithScores = row.options
+                .split('|')
+                .map((opt: string) => {
+                  const parts = opt.trim().split(':');
+                  
+                  if (parts.length !== 2) {
+                    throw new Error(`Invalid option format: ${opt}`);
+                  }
+                  
+                  const label = parts[0].trim();
+                  const scoreStr = parts[1].trim();
+                  
+                  if (!label) {
+                    throw new Error('Option label cannot be empty');
+                  }
+                  
+                  const score = parseFloat(scoreStr);
+                  
+                  if (isNaN(score)) {
+                    throw new Error(`Invalid score value: ${scoreStr}`);
+                  }
+                  
+                  return {
+                    label,
+                    score,
+                  };
+                });
+            } catch (err) {
+              console.error(`Failed to parse options for row:`, row);
+              console.error('Error:', err.message);
+              throw new BadRequestException(
+                `Invalid options format in CSV. Expected format: "Label1:Score1|Label2:Score2". Error: ${err.message}`
+              );
+            }
+          } 
           dtos.push({
             assessmentId: Number(row.assessmentId),
             questions: row.questions,
@@ -93,6 +122,11 @@ export class QuestionnaireController {
         .on('error', reject);
     });
 
+    
+if (dtos.length === 0) {
+      throw new BadRequestException('No valid data found in CSV file');
+    }
+
     // 2️⃣ Loop & call existing create() service
     const createdQuestions = [];
 
@@ -104,7 +138,7 @@ export class QuestionnaireController {
 
     return sendResponse(
       createdQuestions,
-      'Questionnaires created successfully',
+ `${createdQuestions.length} Questionnaires created successfully`,
       201,
     );
   }

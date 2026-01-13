@@ -119,9 +119,18 @@ export class SubmissionController {
 
       if (questionData && questionData.options) {
         // Find the selected option by matching answer label
-        const selectedOption = questionData.options.find(
-          (opt) => opt.label === ans.answer
-        );
+        // const selectedOption = questionData.options.find(
+        //   (opt) => opt.label === ans.
+          // );
+        let options = [];
+        if (typeof questionData.options === 'string') {
+          options = JSON.parse(questionData.options);
+        } else {
+          options = questionData.options;
+        }
+
+const selectedOption = options.find(opt => opt.label === ans.answer);
+
 
         if (selectedOption) {
           totalScore += Number(selectedOption.score);
@@ -132,7 +141,8 @@ export class SubmissionController {
         }
 
         // Calculate max possible score for this question
-        const maxScore = Math.max(...questionData.options.map(opt => Number(opt.score)));
+        const maxScore = Math.max(...options.map(opt => Number(opt.score)));
+
         totalPossibleScore += maxScore;
       }
     }
