@@ -129,7 +129,21 @@ export class SubmissionController {
           options = questionData.options;
         }
 
-const selectedOption = options.find(opt => opt.label === ans.answer);
+        // Skip text-type or invalid options
+  if (
+    questionData.answerType === 'Text' ||
+    !Array.isArray(options) ||
+    options.length === 0 ||
+    typeof options[0] !== 'object'
+  ) {
+    ans.score = 0;
+    continue;
+  }
+
+// const selectedOption = options.find(opt => opt.label === ans.answer);
+const selectedOption = options.find(
+  opt => opt.label?.toLowerCase() === ans.answer?.toLowerCase()
+);
 
 
         if (selectedOption) {
@@ -141,7 +155,7 @@ const selectedOption = options.find(opt => opt.label === ans.answer);
         }
 
         // Calculate max possible score for this question
-        const maxScore = Math.max(...options.map(opt => Number(opt.score)));
+        const maxScore = Math.max(...options.map(opt => Number(opt.score || 0)));
 
         totalPossibleScore += maxScore;
       }
