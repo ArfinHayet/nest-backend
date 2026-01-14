@@ -29,8 +29,8 @@ export class PaymentService {
         },
       ],
       mode: 'payment',
-      success_url: 'https://neurocheckpro.com/',
-      cancel_url: 'https://neurocheckpro.com/',
+      success_url: 'https://neurocheckpro.com/success',
+      cancel_url: 'https://neurocheckpro.com/failed',
     });
 
     // ✅ Save to DB with "pending" status
