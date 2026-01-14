@@ -25,11 +25,11 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   // ✅ Stripe webhook: raw body parser
-  app.use('/api/payment/webhook', bodyParser.raw({ type: 'application/json' }));
+  app.use('/payment/webhook', bodyParser.raw({ type: 'application/json' }));
 
 
   // Only the Calendly webhook route should use raw body
-  app.use('/api/webhooks/calendly', bodyParser.raw({ type: 'application/json' }));
+  app.use('/webhooks/calendly', bodyParser.raw({ type: 'application/json' }));
 
   // ✅ Prefix all routes with /api
   // app.setGlobalPrefix('api');
