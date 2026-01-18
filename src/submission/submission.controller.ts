@@ -28,6 +28,7 @@ import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Public } from 'src/public/public.decorator';
 
+// guard removed
 @UseGuards(JwtAuthGuard)
 @ApiTags('Submissions')
 @Controller('submissions')
