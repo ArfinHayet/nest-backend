@@ -28,7 +28,7 @@ import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Public } from 'src/public/public.decorator';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard)
 @ApiTags('Submissions')
 @Controller('submissions')
 export class SubmissionController {
@@ -39,8 +39,8 @@ export class SubmissionController {
     private readonly aiSummery: AiSummaryService,
     private readonly paymentService: PaymentService,
     private readonly answerService: AnswerService,
-    private readonly usersService: UsersService
-  ) { }
+    private readonly usersService: UsersService,
+  ) {}
   @Post()
   @Roles('admin', 'user', 'clinician')
   @ApiOperation({ summary: 'Create a new submission' })
@@ -105,73 +105,72 @@ export class SubmissionController {
     //   dto.passed = totalScore > 42 ? true : false;
     // }
 
-
-     // -------------------------------------------------------
+    // -------------------------------------------------------
     // ⭐ NEW SCORING LOGIC: Calculate score from options
     // -------------------------------------------------------
-  if (dto.answers?.length > 0) {
-    let totalScore = 0;
-    let totalPossibleScore = 0;
+    if (dto.answers?.length > 0) {
+      let totalScore = 0;
+      let totalPossibleScore = 0;
 
-    for (const ans of dto.answers) {
-      // Fetch question to get options with scores
-      const questionData = await this.questionService.findById(ans.questionId);
+      for (const ans of dto.answers) {
+        // Fetch question to get options with scores
+        const questionData = await this.questionService.findById(
+          ans.questionId,
+        );
 
-      if (questionData && questionData.options) {
-        // Find the selected option by matching answer label
-        // const selectedOption = questionData.options.find(
-        //   (opt) => opt.label === ans.
-          // );
-        let options = [];
-        if (typeof questionData.options === 'string') {
-          options = JSON.parse(questionData.options);
-        } else {
-          options = questionData.options;
+        if (questionData && questionData.options) {
+          // Find the selected option by matching answer label
+          let options = [];
+          if (typeof questionData.options === 'string') {
+            options = JSON.parse(questionData.options);
+          } else {
+            options = questionData.options;
+          }
+
+          // Skip text-type or invalid options
+          if (
+            questionData.answerType === 'Text' ||
+            !Array.isArray(options) ||
+            options.length === 0 ||
+            typeof options[0] !== 'object'
+          ) {
+            ans.score = 0;
+            continue;
+          }
+
+          const selectedOption = options.find(
+            (opt) => opt.label?.toLowerCase() === ans.answer,
+          );
+
+          if (selectedOption) {
+            totalScore += Number(selectedOption.score);
+            ans.score = Number(selectedOption.score); // Save score in answer
+          } else {
+            console.warn(
+              `No matching option found for answer: "${ans.answer}" in question ${ans.questionId}`,
+            );
+            ans.score = 0;
+          }
+
+          // Calculate max possible score for this question
+          const maxScore = Math.max(
+            ...options.map((opt) => Number(opt.score || 0)),
+          );
+
+          totalPossibleScore += maxScore;
         }
-
-        // Skip text-type or invalid options
-  if (
-    questionData.answerType === 'Text' ||
-    !Array.isArray(options) ||
-    options.length === 0 ||
-    typeof options[0] !== 'object'
-  ) {
-    ans.score = 0;
-    continue;
-  }
-
-// const selectedOption = options.find(opt => opt.label === ans.answer);
-const selectedOption = options.find(
-  opt => opt.label?.toLowerCase() === ans.answer?.toLowerCase()
-);
-
-
-        if (selectedOption) {
-          totalScore += Number(selectedOption.score);
-          ans.score = Number(selectedOption.score); // Save score in answer
-        } else {
-          console.warn(`No matching option found for answer: "${ans.answer}" in question ${ans.questionId}`);
-          ans.score = 0;
-        }
-
-        // Calculate max possible score for this question
-        const maxScore = Math.max(...options.map(opt => Number(opt.score || 0)));
-
-        totalPossibleScore += maxScore;
       }
+
+      dto.score = totalScore;
+      dto.possible_score = totalPossibleScore;
+
+      // Calculate percentage and set status
+      const percentage =
+        totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
+
+      // If score >= 40% → status2 = "true", else "false"
+      dto.paid_status = percentage >= 40 ? 'true' : 'false';
     }
-
-    dto.score = totalScore;
-    dto.possible_score = totalPossibleScore;
-
-    // Calculate percentage and set status
-    const percentage = totalPossibleScore > 0 
-      ? (totalScore / totalPossibleScore) * 100 
-      : 0;
-
-    // If score >= 40% → status2 = "true", else "false"
-    dto.paid_status = percentage >= 40 ? 'true' : 'false';
-  }
 
     // -------------------------------------------------------
     // ⭐ Premium Assessment: Build dataset + AI summary logic
@@ -180,18 +179,22 @@ const selectedOption = options.find(
       const dataSet = [];
 
       for (const ans of dto.answers) {
-        const questionData = await this.questionService.findById(ans.questionId);
+        const questionData = await this.questionService.findById(
+          ans.questionId,
+        );
 
         if (questionData) {
           dataSet.push({
             question: questionData.questions,
             answer: ans.answer,
-             score: ans.score || 0,
+            score: ans.score || 0,
           });
         }
       }
 
-      const priceInfo = await this.paymentService.getPriceById(existing.priceId);
+      const priceInfo = await this.paymentService.getPriceById(
+        existing.priceId,
+      );
       dto.paidAmount = priceInfo ? priceInfo.unit_amount.toString() : '0';
 
       // generate AI summary
@@ -224,11 +227,14 @@ const selectedOption = options.find(
     }
   }
 
-
   @Put(':id')
   @Public()
   @ApiOperation({ summary: 'Update an existing submission' })
-  @ApiResponse({ status: 200, description: 'Submission updated', type: Submission })
+  @ApiResponse({
+    status: 200,
+    description: 'Submission updated',
+    type: Submission,
+  })
   async update(
     @Param('id') id: number,
     @Body() dto: Partial<CreateSubmissionDto>,
@@ -237,14 +243,20 @@ const selectedOption = options.find(
       const updated = await this.submissionService.updateAssessment(id, dto);
       return updated;
     } catch (err) {
-      throw new BadRequestException(err.message || 'Failed to update submission');
+      throw new BadRequestException(
+        err.message || 'Failed to update submission',
+      );
     }
   }
 
   @Get()
   @Roles('admin', 'user', 'clinician')
   @ApiOperation({ summary: 'Get all submissions' })
-  @ApiResponse({ status: 200, description: 'List of submissions', type: [Submission] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of submissions',
+    type: [Submission],
+  })
   async findAll(@Query() query: Record<string, any>) {
     const submissions = await this.submissionService.findAll(query, true);
     return sendResponse(submissions, 'Submissions retrieved successfully', 200);
@@ -254,14 +266,23 @@ const selectedOption = options.find(
   @Delete(':id')
   @Roles('admin', 'clinician')
   @ApiOperation({ summary: 'Remove all submissions by assessment ID' })
-  @ApiResponse({ status: 200, description: 'All submissions deleted for the given assessment' })
+  @ApiResponse({
+    status: 200,
+    description: 'All submissions deleted for the given assessment',
+  })
   async remove(@Param('id') id: number) {
     try {
       const result = await this.submissionService.deleteAssessment(id);
       await this.answerService.removeByAssessmentId(id);
-      return sendResponse(result, 'Assessment submissions deleted successfully', 200);
+      return sendResponse(
+        result,
+        'Assessment submissions deleted successfully',
+        200,
+      );
     } catch (err) {
-      throw new BadRequestException(err.message || 'Failed to delete assessment submissions');
+      throw new BadRequestException(
+        err.message || 'Failed to delete assessment submissions',
+      );
     }
   }
 }
