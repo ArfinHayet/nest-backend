@@ -83,6 +83,12 @@ export class PaymentController {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     let event: Stripe.Event;
 
+
+    console.log('req.body type:', typeof req.body);
+    console.log('is Buffer:', Buffer.isBuffer(req.body));
+    console.log('constructor:', req.body?.constructor?.name);
+
+
     try {
       event = this.paymentService['stripe'].webhooks.constructEvent(
         req.body,
