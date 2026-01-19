@@ -140,7 +140,7 @@ export class SubmissionController {
           }
 
           const selectedOption = options.find(
-            (opt) => opt.label?.toLowerCase() === ans.answer,
+            (opt) => opt.label?.toLowerCase() === ans.answer?.toLowerCase(),
           );
 
           if (selectedOption) {
