@@ -30,10 +30,11 @@ export class UsersService {
   }
 
   findByEmailOrPhone(identifier: string): Promise<User> {
-    const user = this.userRepo.findOneByCondition([
-      { email: identifier },
-      { phone: identifier },
-    ])
+    const user = this.userRepo.findOneByCondition(
+      identifier.includes('@')
+        ? [{ email: identifier }]
+        : [{ phone: identifier }],
+    );
 
     return user;
   }

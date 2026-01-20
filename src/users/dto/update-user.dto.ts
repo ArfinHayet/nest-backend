@@ -18,7 +18,7 @@ export class UpdateUserDto {
   name?: string;
 
   @ApiProperty({ example: 'john@example.com', required: false })
-  @ValidateIf((o) => !o.phone)
+  // @ValidateIf((o) => !o.phone)
   @IsEmail()
   @IsOptional()
   email?: string;
@@ -29,7 +29,7 @@ export class UpdateUserDto {
   password?: string;
 
   @ApiProperty({ example: '01712345678', required: false })
-  @ValidateIf((o) => !o.email)
+  // @ValidateIf((o) => !o.email)
   @IsString()
   @Matches(/^[0-9]{10,15}$/, { message: 'Phone number must be between 10 to 15 digits' })
   @IsOptional()

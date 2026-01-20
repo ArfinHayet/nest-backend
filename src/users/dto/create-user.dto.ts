@@ -18,7 +18,7 @@ export class CreateUserDto {
   name: string;
 
   @ApiProperty({ example: 'john@example.com', required: false })
-  @ValidateIf((o) => !o.phone)
+  // @ValidateIf((o) => !o.phone)
   @IsEmail()
   @IsNotEmpty()
   email?: string;
@@ -29,10 +29,11 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({ example: '01712345678', required: false })
-  @ValidateIf((o) => !o.email)
+  // @ValidateIf((o) => !o.email)
   @IsString()
+  @IsOptional()
   @Matches(/^[0-9]{10,15}$/, { message: 'Phone number must be between 10 to 15 digits' })
-  @IsNotEmpty()
+  // @IsNotEmpty()
   phone?: string;
 
   @ApiProperty({ example: 30, minimum: 0, maximum: 150, nullable: true })
