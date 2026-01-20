@@ -86,11 +86,13 @@ export class Submission {
   questionType: string;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date; 
+  createdAt: Date;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({ type: 'boolean', nullable: true })
   clinician_approved: string;
-
+  
+  @Column({ type: 'boolean', default: true })
+  isAutoAssigned: boolean;
 
   @Column({ type: 'text', nullable: true })
   reviewer_name: string;

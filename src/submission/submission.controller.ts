@@ -10,6 +10,7 @@ import {
   Delete,
   BadRequestException,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SubmissionService } from './submission.service';
@@ -78,6 +79,9 @@ export class SubmissionController {
 
     const selectedClinician = clinicianLoad[0];
     dto.clinicianId = selectedClinician.id;
+
+    dto.isAutoAssigned = true;
+    dto.clinician_approved = false;
 
     // -----------------------------
     // ⭐ Flutter-Style Scoring Logic
@@ -228,6 +232,45 @@ export class SubmissionController {
     }
   }
 
+  //manual assign clinician
+  @Put(':id/assign-clinician')
+  @Roles('admin')
+  async assignClinician(
+    @Param('id') id: number,
+    @Body() body: { clinicianId: number },
+  ) {
+    const updated = await this.submissionService.updateAssessment(id, {
+      clinicianId: body.clinicianId,
+      isAutoAssigned: false,
+      clinician_approved: false,
+    } as any);
+
+    return sendResponse(updated, 'Clinician assigned', 200);
+  }
+
+  // Clinician Approve
+  @Put(':id/approve')
+  @Roles('clinician')
+  async approveSubmission(@Param('id') id: number, @Req() req: any) {
+    const clinicianId = req.user?.id;
+    const submissions = await this.submissionService.findAll({ id }, true);
+
+    if (!submissions?.[0]) {
+      throw new BadRequestException('Submission not found');
+    }
+
+    if (submissions[0].clinicianId !== clinicianId) {
+      throw new BadRequestException('Not assigned to you');
+    }
+
+    const updated = await this.submissionService.updateAssessment(id, {
+      clinician_approved: true,
+    } as any);
+
+    return sendResponse(updated, 'Approved', 200);
+  }
+
+
   @Put(':id')
   @Public()
   @ApiOperation({ summary: 'Update an existing submission' })
@@ -287,3 +330,5 @@ export class SubmissionController {
     }
   }
 }
+
+
