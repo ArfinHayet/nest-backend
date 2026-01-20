@@ -60,30 +60,28 @@ export class SubmissionController {
     // ----------------------------------------
     // ⭐ AUTO-ASSIGN CLINICIAN (LEAST LOADED)
     // ----------------------------------------
-    const clinicians = await this.usersService.findAll({ role: 'clinician' });
+    // const clinicians = await this.usersService.findAll({ role: 'clinician' });
 
-    if (!clinicians || clinicians.length === 0) {
-      throw new BadRequestException('No clinicians available');
-    }
+    // if (!clinicians || clinicians.length === 0) {
+    //   throw new BadRequestException('No clinicians available');
+    // }
 
     // calculate submission load for each clinician
-    const clinicianLoad = [];
+    // const clinicianLoad = [];
 
-    for (const c of clinicians) {
-      const count = await this.submissionService.countByClinicianId(c.id);
-      clinicianLoad.push({ id: c.id, count });
-    }
+    // for (const c of clinicians) {
+    //   const count = await this.submissionService.countByClinicianId(c.id);
+    //   clinicianLoad.push({ id: c.id, count });
+    // }
 
-    // pick clinician with lowest submission count
-    clinicianLoad.sort((a, b) => a.count - b.count);
+    // // pick clinician with lowest submission count
+    // clinicianLoad.sort((a, b) => a.count - b.count);
 
-    const selectedClinician = clinicianLoad[0];
-    dto.clinicianId = selectedClinician.id;
+    // const selectedClinician = clinicianLoad[0];
+    // dto.clinicianId = selectedClinician.id;
 
-    dto.isAutoAssigned = true;
-    dto.clinician_approved = false;
-
-    // -----------------------------
+    
+    // // -----------------------------
     // ⭐ Flutter-Style Scoring Logic
     // -----------------------------
     // if (dto.answers?.length > 0) {
@@ -110,6 +108,10 @@ export class SubmissionController {
     //   dto.passed = totalScore > 42 ? true : false;
     // }
 
+     dto.clinicianId = null;
+     dto.isAutoAssigned = null;
+    dto.clinician_approved = false;
+    
     // -------------------------------------------------------
     // ⭐ NEW SCORING LOGIC: Calculate score from options
     // -------------------------------------------------------
@@ -222,14 +224,25 @@ export class SubmissionController {
     // -------------------------------
     // ⭐ Create Submission
     // -------------------------------
-    try {
-      return this.submissionService.create(dto);
-    } catch (err) {
-      console.log(err);
-      throw new BadRequestException(
-        err.message || 'Failed to create submission',
-      );
-    }
+    // try {
+    //   return this.submissionService.create(dto);
+     try {
+       // Create submission first
+       const submission = await this.submissionService.create(dto);
+
+       // Check and auto-assign after creation
+       await this.submissionService.checkAndAutoAssignClinician(
+         dto.assessmentId,
+         dto.patientId,
+       );
+
+       return submission;
+     } catch (err) {
+       console.log(err);
+       throw new BadRequestException(
+         err.message || 'Failed to create submission',
+       );
+     }
   }
 
   //manual assign clinician
