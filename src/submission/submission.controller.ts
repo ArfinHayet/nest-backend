@@ -81,35 +81,10 @@ export class SubmissionController {
     // dto.clinicianId = selectedClinician.id;
 
     
-    // // -----------------------------
-    // ⭐ Flutter-Style Scoring Logic
-    // -----------------------------
-    // if (dto.answers?.length > 0) {
-    //   const optionScore: Record<string, number> = {
-    //     "Never": 0,
-    //     "Rarely": 1,
-    //     "Sometimes": 2,
-    //     "Often": 3,
-    //     "Very Often": 4,
-    //   };
-
-    //   let totalScore = 0;
-
-    //   for (const ans of dto.answers) {
-    //     const score = optionScore[ans.answer] ?? 0;
-    //     totalScore += score;
-    //   }
-
-    //   const totalPossibleScore = dto.answers.length * 4;
-
-    //   dto.score = totalScore;
-    //   dto.possible_score = totalPossibleScore;
-
-    //   dto.passed = totalScore > 42 ? true : false;
-    // }
+   
 
      dto.clinicianId = null;
-     dto.isAutoAssigned = null;
+     dto.isAutoAssigned = false;
     dto.clinician_approved = false;
     
     // -------------------------------------------------------
@@ -172,8 +147,7 @@ export class SubmissionController {
       dto.possible_score = totalPossibleScore;
 
       // Calculate percentage and set status
-      const percentage =
-        totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
+      const percentage = totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
 
       // If score >= 40% → status2 = "true", else "false"
       dto.paid_status = percentage >= 40 ? 'true' : 'false';

@@ -90,9 +90,10 @@ export class Submission {
 
   @Column({ type: 'boolean', nullable: true })
   clinician_approved: string;
-  
-  @Column({ type: 'boolean', default: true })
+
+  @Column({ type: 'boolean', default: false, nullable: true })
   isAutoAssigned: boolean;
+ 
 
   @Column({ type: 'text', nullable: true })
   reviewer_name: string;

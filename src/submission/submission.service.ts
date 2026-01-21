@@ -81,21 +81,26 @@ export class SubmissionService {
       false,
     );
 
-    if (!submissions || submissions.length === 0) return null;
+    if (!submissions || submissions.length === 0) {
+      console.log('No submissions found yet');
+      return null;
+    }
 
     // Get unique question types from submissions
     const submittedTypes = new Set(
       submissions.map((s) => s.questionType).filter(Boolean),
     );
 
-     const allQuestions = await this.dataSource
-       .getRepository('Questionnaire')
-       .find({ where: { assessmentId } });
+    // console.log(  `Submitted question types: ${Array.from(submittedTypes).join(', ')}`, );
 
-     const totalQuestionTypes = new Set(
-       allQuestions.map((q) => q.questiontypeid).filter(Boolean),
+    const allQuestions = await this.dataSource
+      .getRepository('Questionnaire')
+      .find({ where: { assessmentId } });
+
+    const totalQuestionTypes = new Set(
+      allQuestions.map((q) => q.questiontypeid).filter(Boolean),
     ).size;
-    
+
     // Check if all question types submitted
     if (submittedTypes.size < totalQuestionTypes) {
       console.log(
@@ -136,4 +141,9 @@ export class SubmissionService {
 
     return selectedClinicianId;
   }
+  // catch(error) {
+  //   console.error(' Error in checkAndAutoAssignClinician', error.message);
+  //   // Don't throw - let submission creation succeed even if auto-assign fails
+  //   return null;
+  // }
 }
