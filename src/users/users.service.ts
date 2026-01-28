@@ -6,6 +6,7 @@ import { UserRepository } from './user.repository';
 import { omit } from "lodash"
 import { NotFoundException } from '@nestjs/common';
 
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -17,14 +18,15 @@ export class UsersService {
     return user;
   }
 
+
   async findAll(query) {
     const users = await this.userRepo.findAll(query);
     // Remove password field from each user
-    return users.map(user => omit(user, ['password']));
+    return users.map((user) => omit(user, ['password']));
   }
 
   async findById(id: number) {
-    let user = await this.userRepo.findById(id)
+    let user = await this.userRepo.findById(id);
     user = omit(user, ['password']);
     return user;
   }
@@ -38,7 +40,6 @@ export class UsersService {
 
     return user;
   }
-
 
   // ✅ New update method
   async update(id: number, updateData: Partial<User>) {
@@ -54,7 +55,6 @@ export class UsersService {
     // hide password before returning
     return omit(user, ['password']);
   }
-
 
   async remove(id: number): Promise<void> {
     return this.userRepo.deleteById(id);
