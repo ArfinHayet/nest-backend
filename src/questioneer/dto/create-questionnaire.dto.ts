@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsString, IsNumber, IsEnum, IsArray, IsOptional } from 'class-validator';
+import { IsInt, IsString, IsNumber, IsEnum, IsArray, IsOptional, isString } from 'class-validator';
 
 export enum AnswerType {
   YES_NO = 'Yes/No',
@@ -89,4 +89,15 @@ export class CreateQuestionnaireDto {
   @IsEnum(QuestionVariant, { message: 'Variant must be one of: multiple_choice, true_false, short_answer' })
   @IsOptional()
   variant: string; // Foreign key column
+
+
+@ApiProperty({
+    description: 'Domain for grouping questions',
+    example: 'weiss family',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  domain?: string;
+  
 }

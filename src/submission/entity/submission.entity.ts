@@ -89,7 +89,7 @@ export class Submission {
   createdAt: Date;
 
   @Column({ type: 'boolean', nullable: true })
-  clinician_approved: string;
+  clinician_approved: boolean;
 
   @Column({ type: 'boolean', default: false, nullable: true })
   isAutoAssigned: boolean;

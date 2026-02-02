@@ -33,19 +33,21 @@ export class Questionnaire {
   // @Column('text', { array: true, nullable: true })
   // options: string[];
 
-   @Column({ 
-    type: 'json', 
+  @Column({
+    type: 'json',
     nullable: true,
-    name: 'options_with_score'  // column name
+    name: 'options_with_score', // column name
   })
-  options: {  
+  options: {
     label: string;
     score: number;
   }[];
 
-
   @Column({ type: 'text', nullable: true })
   answerType: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  domain: string;
 
   // ✅ FIXED: Correct foreign key to QuestionCategory
   @ManyToOne(() => QuestionCategory, { onDelete: 'SET NULL', nullable: true })

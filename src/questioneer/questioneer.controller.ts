@@ -22,29 +22,38 @@ import { Public } from 'src/public/public.decorator';
 @ApiTags('Questionnaires')
 @Controller('questionnaires')
 export class QuestionnaireController {
-  constructor(private readonly questionnaireService: QuestionnaireService) { }
+  constructor(private readonly questionnaireService: QuestionnaireService) {}
 
   @Post()
   @Roles('admin')
   @ApiOperation({ summary: 'Create a new questionnaire' })
-  @ApiResponse({ status: 201, description: 'Questionnaire created successfully', type: Questionnaire })
+  @ApiResponse({
+    status: 201,
+    description: 'Questionnaire created successfully',
+    type: Questionnaire,
+  })
   async create(@Body() dto: CreateQuestionnaireDto) {
-    console.log(dto)
+    console.log(dto);
     const questions = await this.questionnaireService.create(dto);
-    return sendResponse(questions, "Questionnaire created successfully", 201)
+    return sendResponse(questions, 'Questionnaire created successfully', 201);
   }
 
-// csv format
-// assessmentId,questions,order,answerType,options,questiontypeid,variant
-// 1,"Do you exercise regularly?",1,MultipleChoice,"Yes:1|No:0",1,internal
-// 2,"How many hours do you sleep?",2,Text,,2,internal
-// 3,"Are you satisfied?",3,Yes/No,"Yes:1|No:0|Maybe:0.5",1,external
-
+  /**
+   * CSV Format:
+   * assessmentId,questions,order,answerType,options,questiontypeid,variant,domain
+   * 1,"Do you exercise regularly?",1,MultipleChoice,"Yes:1|No:0",1,internal,"Physical Health"
+   * 2,"How many hours do you sleep?",2,Text,"",2,internal,"Sleep Habits"
+   * 3,"Are you satisfied?",3,Yes/No,"Yes:1|No:0|Maybe:0.5",1,external,"Mental Health"
+   */
+  
   @Post('bulk-upload')
   @Roles('admin')
   @ApiOperation({ summary: 'Bulk upload questionnaires using CSV' })
   @ApiConsumes('multipart/form-data')
-  @ApiResponse({ status: 201, description: 'Questionnaires created successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Questionnaires created successfully',
+  })
   @UseInterceptors(FileInterceptor('file'))
   async bulkUpload(@UploadedFile() file: MulterFile) {
     if (!file) {
@@ -53,127 +62,139 @@ export class QuestionnaireController {
 
     const dtos: CreateQuestionnaireDto[] = [];
 
-    // 1️⃣ Parse CSV
+    // Parse CSV
     await new Promise<void>((resolve, reject) => {
       Readable.from(file.buffer)
         .pipe(csv())
         .on('data', (row) => {
-           // Parse options with scores
-        // let optionsWithScores = undefined;
-        
-       // Parse options with scores
-          let optionsWithScores: OptionWithScore[] | undefined = undefined;
-          
-          if (row.options && row.options.trim() !== '') {
-            try {
-              // CSV format: "Yes:1|No:0"
-              optionsWithScores = row.options
-                .split('|')
-                .map((opt: string) => {
-                  const parts = opt.trim().split(':');
-                  
-                  if (parts.length !== 2) {
-                    throw new Error(`Invalid option format: ${opt}`);
-                  }
-                  
-                  const label = parts[0].trim();
-                  const scoreStr = parts[1].trim();
-                  
-                  if (!label) {
-                    throw new Error('Option label cannot be empty');
-                  }
-                  
-                  const score = parseFloat(scoreStr);
-                  
-                  if (isNaN(score)) {
-                    throw new Error(`Invalid score value: ${scoreStr}`);
-                  }
-                  
-                  return {
-                    label,
-                    score,
-                  };
-                });
-            } catch (err) {
-              console.error(`Failed to parse options for row:`, row);
-              console.error('Error:', err.message);
-              throw new BadRequestException(
-                `Invalid options format in CSV. Expected format: "Label1:Score1|Label2:Score2". Error: ${err.message}`
-              );
-            }
-          } 
-          dtos.push({
-            assessmentId: Number(row.assessmentId),
-            questions: row.questions,
-            order: Number(row.order),
-            answerType: row.answerType as AnswerType,
-            // options: row.options
-            //   ? row.options.split('|').map((o: string) => o.trim())
-            //   : undefined,
-                      options: optionsWithScores, 
+          try {
+            // Parse options with scores
+            let optionsWithScores: OptionWithScore[] | undefined = undefined;
 
-            questiontypeid: row.questiontypeid
-              ? Number(row.questiontypeid)
-              : undefined,
-            variant: row.variant || undefined,
-          });
+            if (row.options && row.options.trim() !== '') {
+              // Format: "Yes:1|No:0|Maybe:0.5"
+              optionsWithScores = row.options.split('|').map((opt: string) => {
+                const parts = opt.trim().split(':');
+
+                if (parts.length !== 2) {
+                  throw new Error(`Invalid option format: ${opt}`);
+                }
+
+                const label = parts[0].trim();
+                const scoreStr = parts[1].trim();
+
+                if (!label) {
+                  throw new Error('Option label cannot be empty');
+                }
+
+                const score = parseFloat(scoreStr);
+
+                if (isNaN(score)) {
+                  throw new Error(`Invalid score value: ${scoreStr}`);
+                }
+
+                return { label, score };
+              });
+            }
+
+            // Build DTO
+            const dto: CreateQuestionnaireDto = {
+              assessmentId: Number(row.assessmentId),
+              questions: row.questions?.trim() || '',
+              order: Number(row.order),
+              answerType: row.answerType as AnswerType,
+              options: optionsWithScores,
+              questiontypeid: row.questiontypeid
+                ? Number(row.questiontypeid)
+                : undefined,
+              variant: row.variant?.trim() || undefined,
+              domain: row.domain?.trim() || undefined,
+            };
+
+            // Validate required fields
+            if (!dto.questions) {
+              throw new Error('Question text is required');
+            }
+            if (!dto.assessmentId || isNaN(dto.assessmentId)) {
+              throw new Error('Valid assessmentId is required');
+            }
+
+            dtos.push(dto);
+          } catch (err) {
+            console.error('Error parsing row:', row);
+            console.error('Error message:', err.message);
+            throw new BadRequestException(`CSV parsing error: ${err.message}`);
+          }
         })
         .on('end', resolve)
         .on('error', reject);
     });
 
-    
-if (dtos.length === 0) {
+    if (dtos.length === 0) {
       throw new BadRequestException('No valid data found in CSV file');
     }
 
-    // 2️⃣ Loop & call existing create() service
+    // Create all questionnaires
     const createdQuestions = [];
 
     for (const dto of dtos) {
-      console.log('Creating questionnaire:', dto);
+      console.log('Creating questionnaire from CSV:', dto);
       const question = await this.questionnaireService.create(dto);
       createdQuestions.push(question);
     }
 
     return sendResponse(
       createdQuestions,
- `${createdQuestions.length} Questionnaires created successfully`,
+      `${createdQuestions.length} questionnaires created successfully`,
       201,
     );
   }
 
 
+
   @Put(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Update a questionnaire' })
-  @ApiResponse({ status: 201, description: 'Questionnaire Updated successfully', type: Questionnaire })
+  @ApiResponse({
+    status: 201,
+    description: 'Questionnaire Updated successfully',
+    type: Questionnaire,
+  })
   async update(
     @Param('id', ParseIntPipe) id: number, // <-- add ParseIntPipe
     @Body() dto: UpdateQuestionnaireDto,
   ) {
     const questions = await this.questionnaireService.update(id, dto);
-    return sendResponse(questions, "Questionnaire updated successfully", 201)
+    return sendResponse(questions, 'Questionnaire updated successfully', 201);
   }
-
 
   @Get()
   @Public()
   @ApiOperation({ summary: 'Get all questionnaires' })
-  @ApiResponse({ status: 200, description: 'List of questionnaires', type: [Questionnaire] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of questionnaires',
+    type: [Questionnaire],
+  })
   async findAll(@Query() query: Record<string, any>) {
     const questions = await this.questionnaireService.findAll(query);
-    return sendResponse(questions, 'questions retrieved successfully', 201)
+    return sendResponse(questions, 'questions retrieved successfully', 201);
   }
-
 
   @Delete(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Delete a questionnaire' })
-  @ApiResponse({ status: 200, description: 'Questionnaire deleted successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Questionnaire deleted successfully',
+  })
   async delete(@Param('id', ParseIntPipe) id: number) {
     await this.questionnaireService.delete(id);
-    return sendResponse(null, `Questionnaire with id ${id} deleted successfully`, 200);
+    return sendResponse(
+      null,
+      `Questionnaire with id ${id} deleted successfully`,
+      200,
+    );
   }
 }
 
