@@ -93,7 +93,6 @@ export class Submission {
 
   @Column({ type: 'boolean', default: false, nullable: true })
   isAutoAssigned: boolean;
- 
 
   @Column({ type: 'text', nullable: true })
   reviewer_name: string;
@@ -106,4 +105,7 @@ export class Submission {
 
   @Column({ type: 'text', nullable: true })
   reviewer_relation: string;
+
+  @Column({ type: 'json', nullable: true })
+  domainScores: Record<string, { score: number; possible: number }>;
 }

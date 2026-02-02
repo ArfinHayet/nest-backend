@@ -28,7 +28,7 @@ export class CreateSubmissionDto {
   @ApiProperty({
     description: 'Score achieved in the assessment',
     example: 85,
-    required:false
+    required: false,
   })
   @IsInt()
   score: number;
@@ -52,8 +52,26 @@ export class CreateSubmissionDto {
   @Type(() => CreateAnswerDto)
   answers?: CreateAnswerDto[];
 
-
   @IsNumber()
   @IsOptional()
   clinicianId?: number;
+
+  @ApiProperty({
+    description: 'Domain wise score (premium assessments only)',
+    example: {
+      anxiety: { score: 18, possible: 25 },
+      depression: { score: 12, possible: 20 },
+    },
+    required: false,
+  })
+  @IsOptional()
+  domainScores?: Record<
+    string,
+    {
+      score: number;
+      possible: number;
+    }
+    >;
+  
+  
 }
