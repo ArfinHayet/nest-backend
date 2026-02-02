@@ -90,68 +90,142 @@ export class SubmissionController {
     // -------------------------------------------------------
     // ⭐ NEW SCORING LOGIC: Calculate score from options
     // -------------------------------------------------------
+    // if (dto.answers?.length > 0) {
+    //   let totalScore = 0;
+    //   let totalPossibleScore = 0;
+
+    //   for (const ans of dto.answers) {
+    //     // Fetch question to get options with scores
+    //     const questionData = await this.questionService.findById(
+    //       ans.questionId,
+    //     );
+
+    //     if (questionData && questionData.options) {
+    //       // Find the selected option by matching answer label
+    //       let options = [];
+    //       if (typeof questionData.options === 'string') {
+    //         options = JSON.parse(questionData.options);
+    //       } else {
+    //         options = questionData.options;
+    //       }
+
+    //       // Skip text-type or invalid options
+    //       if (
+    //         questionData.answerType === 'Text' ||
+    //         !Array.isArray(options) ||
+    //         options.length === 0 ||
+    //         typeof options[0] !== 'object'
+    //       ) {
+    //         ans.score = 0;
+    //         continue;
+    //       }
+
+    //       const selectedOption = options.find(
+    //         (opt) => opt.label?.toLowerCase() === ans.answer?.toLowerCase(),
+    //       );
+
+    //       if (selectedOption) {
+    //         totalScore += Number(selectedOption.score);
+    //         ans.score = Number(selectedOption.score); // Save score in answer
+    //       } else {
+    //         console.warn(
+    //           `No matching option found for answer: "${ans.answer}" in question ${ans.questionId}`,
+    //         );
+    //         ans.score = 0;
+    //       }
+
+    //       // Calculate max possible score for this question
+    //       const maxScore = Math.max(
+    //         ...options.map((opt) => Number(opt.score || 0)),
+    //       );
+
+    //       totalPossibleScore += maxScore;
+    //     }
+    //   }
+
+    //   dto.score = totalScore;
+    //   dto.possible_score = totalPossibleScore;
+
+    //   // Calculate percentage and set status
+    //   const percentage = totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
+
+    //   // If score >= 40% → status2 = "true", else "false"
+    //   dto.paid_status = percentage >= 40 ? 'true' : 'false';
+    // }
+
+    // domain based grouping scoring, only for premium assessments
     if (dto.answers?.length > 0) {
       let totalScore = 0;
       let totalPossibleScore = 0;
 
+      // ⭐ domain-wise accumulator (premium only)
+      const domainScores: Record<string, { score: number; possible: number }> =
+        {};
+
       for (const ans of dto.answers) {
-        // Fetch question to get options with scores
         const questionData = await this.questionService.findById(
           ans.questionId,
         );
 
-        if (questionData && questionData.options) {
-          // Find the selected option by matching answer label
-          let options = [];
-          if (typeof questionData.options === 'string') {
-            options = JSON.parse(questionData.options);
-          } else {
-            options = questionData.options;
+        if (!questionData || !questionData.options) {
+          ans.score = 0;
+          continue;
+        }
+
+        let options = [];
+        if (typeof questionData.options === 'string') {
+          options = JSON.parse(questionData.options);
+        } else {
+          options = questionData.options;
+        }
+
+        // Skip text type
+        if (questionData.answerType === 'Text' || !Array.isArray(options)) {
+          ans.score = 0;
+          continue;
+        }
+
+        const selectedOption = options.find(
+          (opt) => opt.label?.toLowerCase() === ans.answer?.toLowerCase(),
+        );
+
+        const score = selectedOption ? Number(selectedOption.score) : 0;
+        ans.score = score;
+
+        totalScore += score;
+
+        const maxScore = Math.max(
+          ...options.map((opt) => Number(opt.score || 0)),
+        );
+        totalPossibleScore += maxScore;
+
+        // ⭐ PREMIUM → DOMAIN WISE SCORE
+        if (existing.type === 'premium' && questionData.domain) {
+          const domain = questionData.domain;
+
+          if (!domainScores[domain]) {
+            domainScores[domain] = { score: 0, possible: 0 };
           }
 
-          // Skip text-type or invalid options
-          if (
-            questionData.answerType === 'Text' ||
-            !Array.isArray(options) ||
-            options.length === 0 ||
-            typeof options[0] !== 'object'
-          ) {
-            ans.score = 0;
-            continue;
-          }
-
-          const selectedOption = options.find(
-            (opt) => opt.label?.toLowerCase() === ans.answer?.toLowerCase(),
-          );
-
-          if (selectedOption) {
-            totalScore += Number(selectedOption.score);
-            ans.score = Number(selectedOption.score); // Save score in answer
-          } else {
-            console.warn(
-              `No matching option found for answer: "${ans.answer}" in question ${ans.questionId}`,
-            );
-            ans.score = 0;
-          }
-
-          // Calculate max possible score for this question
-          const maxScore = Math.max(
-            ...options.map((opt) => Number(opt.score || 0)),
-          );
-
-          totalPossibleScore += maxScore;
+          domainScores[domain].score += score;
+          domainScores[domain].possible += maxScore;
         }
       }
 
       dto.score = totalScore;
       dto.possible_score = totalPossibleScore;
 
-      // Calculate percentage and set status
-      const percentage = totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
+      // ⭐ attach only for premium
+      if (existing.type === 'premium') {
+        dto.domainScores = domainScores;
+      }
 
-      // If score >= 40% → status2 = "true", else "false"
+      const percentage =
+        totalPossibleScore > 0 ? (totalScore / totalPossibleScore) * 100 : 0;
+
       dto.paid_status = percentage >= 40 ? 'true' : 'false';
     }
+
 
     // -------------------------------------------------------
     // ⭐ Premium Assessment: Build dataset + AI summary logic
