@@ -33,8 +33,8 @@ export class OtpService {
   }
   generateOtp(): string {
     const otp = randomInt(1000, 10000); // 10000 is exclusive, so range is 1000-9999
-    // return otp.toString();
-    return '4321';              //static otp
+    return otp.toString();
+    // return '4321';              //static otp
   }
 
   async hashOtp(otp: string): Promise<string> {
@@ -43,12 +43,12 @@ export class OtpService {
 
   async verifyOtp(providedOtp: string, hashedOtp: string): Promise<boolean> {
 
-    // static otp verify
-    const STATIC_OTP = '4321';
-    if (providedOtp === STATIC_OTP) {
-      return true;
-    }
-    // return await bcrypt.compare(providedOtp, hashedOtp);
+    // // static otp verify
+    // const STATIC_OTP = '4321';
+    // if (providedOtp === STATIC_OTP) {
+    //   return true;
+    // }
+    return await bcrypt.compare(providedOtp, hashedOtp);
   }
 
   getExpiryDate(): Date {
