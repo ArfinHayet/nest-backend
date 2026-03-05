@@ -11,7 +11,8 @@ export class CreateAssessmentDto {
 
   @ApiProperty({
     description: 'Detailed description of the assessment',
-    example: 'This assessment measures your memory, attention, and reasoning abilities.',
+    example:
+      'This assessment measures your memory, attention, and reasoning abilities.',
   })
   @IsString()
   description: string;
@@ -44,5 +45,12 @@ export class CreateAssessmentDto {
     example: 'Aptitude Test',
   })
   @IsString()
-  priceId: string;   
+  priceId: string;
+
+  @ApiProperty({
+    description: 'Assigned to specific user type',
+    example: 'Clinician',
+  })
+  @IsString()
+  assignedTo: string;
 }
