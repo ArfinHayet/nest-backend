@@ -23,7 +23,7 @@ export class UsersController {
     const user = await this.usersService.create(createUserDto);
     return sendResponse(user, 'User created successfully', 201)
   }
-  @Roles('admin')
+  @Roles('admin', 'clinic')
   @Get()
   async findAll(@Query() query: Record<string, any>) {
     const users = await this.usersService.findAll(query);
@@ -31,7 +31,7 @@ export class UsersController {
   }
 
 
-  @Roles('admin', 'user')
+  @Roles('admin', 'user', 'clinic')
   @Get(':id/') // ✅ Define path properly
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async findById(
@@ -41,7 +41,7 @@ export class UsersController {
     return sendResponse(patient, 'User retrieved successfully', 201)
   }
 
-  @Roles('admin', 'user')
+  @Roles('admin', 'user', 'clinic')
   @Get(':id/patients') // ✅ Define path properly
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async getPatientsByUser(
@@ -53,7 +53,7 @@ export class UsersController {
 
 
   // ✅ Update user endpoint
-  @Roles('admin', 'user', 'clinician')
+  @Roles('admin', 'user', 'clinician', 'clinic')
   @Put(':id')
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })
   async update(

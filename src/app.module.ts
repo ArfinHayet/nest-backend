@@ -26,6 +26,7 @@ import { QuestionCategoryModule } from './question-category/question-category.mo
 import { MailModule } from './mail/mail.module';
 import { BannerModule } from './banner/banner.module';
 import { NotificationModule } from './notifications/notifications.module';
+import { ClinicModule } from './clinic/clinic.module';
 
 
 @Module({
@@ -58,7 +59,7 @@ import { NotificationModule } from './notifications/notifications.module';
 
     }),
 
-    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule, CustomMailerModule, QuestionCategoryModule, MailModule, BannerModule, NotificationModule
+    UsersModule, AuthModule, PatientModule, AssessmentModule, QuestioneerModule, SubmissionModule, PaymentModule, AiSummeryModule, PrescriptionModule, AvailabilityModule, LeaveModule, BlogModule, FirebaseModule, UploadModule, AppointmentsModule, CustomMailerModule, QuestionCategoryModule, MailModule, BannerModule, NotificationModule, ClinicModule,
   ],
   controllers: [AppController],
   providers: [AppService, ZoomService, CustomMailerModule]

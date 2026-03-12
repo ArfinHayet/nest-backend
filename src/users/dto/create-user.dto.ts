@@ -63,7 +63,7 @@ export class CreateUserDto {
   @IsOptional()
   street: string;
 
-  @ApiProperty({ example: 'user', description: 'Role of the user (e.g., user, admin, clinician)' })
+  @ApiProperty({ example: 'user', description: 'Role of the user (e.g., user, admin, clinician, clinic)' })
   @IsString()
   @IsNotEmpty()
   role: string;
@@ -75,7 +75,7 @@ export class CreateUserDto {
 
   @ApiProperty({ example: '123456', description: 'One Time Password sent to user' })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   otp: string;
 
   @ApiProperty({ example: 'john@example.com', description: 'Email or phone used for verification' })
