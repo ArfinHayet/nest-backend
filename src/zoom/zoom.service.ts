@@ -9,11 +9,7 @@ import { AppointmentsService } from 'src/appointments/appointments.service';
 
 @Injectable()
 export class ZoomService {
-     
-  constructor(
-    private readonly appointmentsService: AppointmentsService,
-  ){}
-
+  constructor(private readonly appointmentsService: AppointmentsService) {}
 
   private readonly logger = new Logger(ZoomService.name);
   private clientId = process.env.ZOOM_CLIENT_ID!;
@@ -23,7 +19,9 @@ export class ZoomService {
   private sdkSecret = process.env.ZOOM_SDK_SECRET!;
 
   private async getAccessToken() {
-    const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+    const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString(
+      'base64',
+    );
     const url = `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${this.accountId}`;
     const res = await axios.post(url, null, {
       headers: {
@@ -39,7 +37,7 @@ export class ZoomService {
     topic: string,
     start: string,
     duration = 30,
-    displayName = 'User'
+    displayName = 'User',
   ) {
     const token = await this.getAccessToken();
     const res = await axios.post(
@@ -49,7 +47,7 @@ export class ZoomService {
         type: 2,
         start_time: start,
         duration,
-        timezone: 'Europe/London', //winter e gmt, summer e bst
+        timezone: 'UTC', //winter e gmt, summer e bst
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
@@ -64,27 +62,30 @@ export class ZoomService {
     };
   }
 
-
   generateSdkSignature(meetingNumber: string, role: 0 | 1) {
     const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + 60 * 60; // valid 1 hour
-    const payload = {
-      sdkKey: this.sdkKey,
-      mn: meetingNumber,
-      role,
-      iat,
-      exp,
-      tokenExp: exp,
-    };
-    return jwt.sign(payload, this.sdkSecret, { algorithm: 'HS256' });
+    const exp = iat + 60 * 60;
+
+    return jwt.sign(
+      {
+        sdkKey: this.sdkKey,
+        mn: meetingNumber,
+        role,
+        iat,
+        exp,
+        tokenExp: exp,
+      },
+      this.sdkSecret,
+      { algorithm: 'HS256' },
+    );
   }
-
-
 
   @OnEvent('appointment.created')
   async handleAppointmentCreatedEvent(appointment: Appointments) {
     try {
-      this.logger.log(`📅 Creating Zoom meeting for appointment ${appointment.id}`);
+      this.logger.log(
+        `📅 Creating Zoom meeting for appointment ${appointment.id}`,
+      );
 
       const startTime = new Date(appointment.time); // ensure it's a Date object
 
@@ -93,20 +94,19 @@ export class ZoomService {
         `Appointment with patient ${appointment.patientId}`,
         startTime.toISOString(),
         30,
-        `Patient ${appointment.patientId}`
+        `Patient ${appointment.patientId}`,
       );
 
       this.logger.log(`✅ Zoom meeting created: ${meeting.join_url}`);
 
       // 👉 Optionally update appointment with meeting details
-      await this.appointmentsService.update(appointment.id, { 
+      await this.appointmentsService.update(appointment.id, {
         link: meeting.join_url,
         meetingId: meeting.meetingId,
         meetingPassword: meeting.meetingPassword,
         displayName: meeting.displayName,
-        signature: meeting.sdkSignature
-      });     
-
+        signature: meeting.sdkSignature,
+      });
     } catch (err) {
       this.logger.error(
         `❌ Failed to create Zoom meeting for appointment ${appointment.id}`,
@@ -114,6 +114,4 @@ export class ZoomService {
       );
     }
   }
-
-
 }

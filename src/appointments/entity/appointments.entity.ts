@@ -18,6 +18,9 @@ export class Appointments {
   @Column({ type: 'timestamp' })
   time: Date;
 
+  @Column({ nullable: true, default: 'Europe/London' })
+  timezone: string;
+
   @Column({ nullable: true })
   link: string;
 
@@ -34,7 +37,6 @@ export class Appointments {
 
   @Column({ nullable: true })
   displayName: string;
-
 
   @Column({ nullable: true })
   signature: string;
@@ -59,5 +61,4 @@ export class Appointments {
 
   @Column({ type: 'text', nullable: true })
   diagosis_recommendation: string;
-
 }

@@ -33,6 +33,15 @@ export class CreateAppointmentDto {
   time: Date;
 
   @ApiProperty({
+    description: 'Timezone of the appointment',
+    example: 'Europe/London',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  timezone?: string;
+
+  @ApiProperty({
     description: 'Zoom meeting join link',
     example: 'https://zoom.us/j/1234567890',
     required: false,
@@ -68,11 +77,9 @@ export class CreateAppointmentDto {
   @IsString()
   displayName?: string;
 
-
   @IsOptional()
   @IsString()
   signature?: string;
-
 
   @IsOptional()
   @IsString()
