@@ -40,14 +40,18 @@ export class ZoomService {
     displayName = 'User',
   ) {
     const token = await this.getAccessToken();
+
+    const utcDateStr = new Date(start).toISOString().replace('Z', ''); // "2026-04-06T18:17:00.000" — no Z
+
+
     const res = await axios.post(
       `https://api.zoom.us/v2/users/${userId}/meetings`,
       {
         topic,
         type: 2,
-        start_time: start,
+        start_time: utcDateStr,
         duration,
-        timezone: 'UTC', //winter e gmt, summer e bst
+        timezone: 'UTC', //always utc
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
