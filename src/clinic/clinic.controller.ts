@@ -36,8 +36,6 @@ export class ClinicController {
   }
 
   @Roles('admin')
-    
-    
     @Get()
 async findAll(@Query() query: Record<string, any>) {
   const clinics = await this.clinicService.findAll(query);

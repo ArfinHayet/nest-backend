@@ -49,6 +49,7 @@ export class ZoomService {
         type: 2,
         start_time: start,
         duration,
+        timezone: 'Europe/London', //winter e gmt, summer e bst
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
