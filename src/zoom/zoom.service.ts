@@ -15,8 +15,8 @@ export class ZoomService {
   private clientId = process.env.ZOOM_CLIENT_ID!;
   private clientSecret = process.env.ZOOM_CLIENT_SECRET!;
   private accountId = process.env.ZOOM_ACCOUNT_ID!;
-  private sdkKey = process.env.ZOOM_SDK_KEY!;
-  private sdkSecret = process.env.ZOOM_SDK_SECRET!;
+  // private sdkKey = process.env.ZOOM_SDK_KEY!;
+  // private sdkSecret = process.env.ZOOM_SDK_SECRET!;
 
   private async getAccessToken() {
     const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString(
@@ -42,8 +42,7 @@ export class ZoomService {
     const token = await this.getAccessToken();
 
     // const utcDateStr = new Date(start).toISOString().replace('Z', ''); // "2026-04-06T18:17:00.000" — no Z
-const utcDateStr = new Date(start).toISOString().split('.')[0] + 'Z';
-
+    const utcDateStr = new Date(start).toISOString().split('.')[0] + 'Z';
 
     const res = await axios.post(
       `https://api.zoom.us/v2/users/${userId}/meetings`,
@@ -63,27 +62,28 @@ const utcDateStr = new Date(start).toISOString().split('.')[0] + 'Z';
       meetingId: res.data.id,
       meetingPassword: res.data.password,
       displayName,
-      sdkSignature: this.generateSdkSignature(res.data.id.toString(), 0), // 0 = participant
+      // sdkSignature: this.generateSdkSignature(res.data.id, 0), // 0 = participant
     };
   }
 
-  generateSdkSignature(meetingNumber: string, role: 0 | 1) {
-    const iat = Math.floor(Date.now() / 1000);
-    const exp = iat + 60 * 60;
+  // generateSdkSignature(meetingNumber: string, role: 0 | 1) {
+  //   const iat = Math.floor(Date.now() / 1000);
+  //   const exp = iat + 60 * 60;
 
-    return jwt.sign(
-      {
-        sdkKey: this.sdkKey,
-        mn: meetingNumber,
-        role,
-        iat,
-        exp,
-        tokenExp: exp,
-      },
-      this.sdkSecret,
-      { algorithm: 'HS256' },
-    );
-  }
+  //   return jwt.sign(
+  //     {
+  //       sdkKey: this.sdkKey,
+  //       mn: meetingNumber,
+  //       role,
+  //       iat,
+  //       exp,
+  //       appKey: this.sdkKey,
+  //       tokenExp: exp,
+  //     },
+  //     this.sdkSecret,
+  //     { algorithm: 'HS256' },
+  //   );
+  // }
 
   @OnEvent('appointment.created')
   async handleAppointmentCreatedEvent(appointment: Appointments) {
@@ -110,13 +110,34 @@ const utcDateStr = new Date(start).toISOString().split('.')[0] + 'Z';
         meetingId: meeting.meetingId,
         meetingPassword: meeting.meetingPassword,
         displayName: meeting.displayName,
-        signature: meeting.sdkSignature,
+        // signature: meeting.sdkSignature,
       });
     } catch (err) {
       this.logger.error(
         `❌ Failed to create Zoom meeting for appointment ${appointment.id}`,
         err.stack,
       );
+    }
+  }
+
+  @OnEvent('appointment.rescheduled')
+  async handleReschedule(appointment: Appointments) {
+    try {
+      const meeting = await this.createMeeting(
+        'me',
+        `Appointment with patient ${appointment.patientId}`,
+        new Date(appointment.time).toISOString(),
+        30,
+        `Patient ${appointment.patientId}`,
+      );
+
+      await this.appointmentsService.update(appointment.id, {
+        link: meeting.join_url,
+        meetingId: meeting.meetingId,
+        meetingPassword: meeting.meetingPassword,
+      });
+    } catch (err) {
+      this.logger.error('❌ Reschedule meeting failed', err.stack);
     }
   }
 }

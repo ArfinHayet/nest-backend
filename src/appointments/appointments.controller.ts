@@ -14,48 +14,83 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class AppointmentsController {
   constructor(
     private readonly appointmentsService: AppointmentsService,
-    private readonly eventEmitter: EventEmitter2
-) {}
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @Post()
   @Roles('admin', 'user')
   @ApiOperation({ summary: 'Create a new appointment' })
-  @ApiResponse({ status: 201, description: 'Appointment successfully created', type: Appointments })
+  @ApiResponse({
+    status: 201,
+    description: 'Appointment successfully created',
+    type: Appointments,
+  })
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
-    const appointment = await this.appointmentsService.create(createAppointmentDto);
+    const appointment =
+      await this.appointmentsService.create(createAppointmentDto);
     this.eventEmitter.emit('appointment.created', appointment);
-    return sendResponse(appointment, 'Appointment created successfully. Zoom link creation is in progress', 201);
+    return sendResponse(
+      appointment,
+      'Appointment created successfully. Zoom link creation is in progress',
+      201,
+    );
   }
 
   @Get()
   @Roles('admin')
   @ApiOperation({ summary: 'Get all appointments' })
-  @ApiResponse({ status: 200, description: 'List of appointments', type: [Appointments] })
+  @ApiResponse({
+    status: 200,
+    description: 'List of appointments',
+    type: [Appointments],
+  })
   async findAll(@Query() query: Record<string, any>) {
-    const appointments = await this.appointmentsService.findAll(query);  
+    const appointments = await this.appointmentsService.findAll(query);
 
     if (!appointments || appointments.length === 0) {
       return sendResponse([], 'No appointments found', 200);
     }
 
-    return sendResponse(appointments, 'Appointments retrieved successfully', 200);
+    return sendResponse(
+      appointments,
+      'Appointments retrieved successfully',
+      200,
+    );
   }
 
   @Get(':id')
   @Roles('admin', 'user')
   @ApiOperation({ summary: 'Get appointment by ID' })
-  @ApiResponse({ status: 200, description: 'Appointment retrieved successfully', type: Appointments })
+  @ApiResponse({
+    status: 200,
+    description: 'Appointment retrieved successfully',
+    type: Appointments,
+  })
   async findById(@Param('id') id: string) {
     const appointment = await this.appointmentsService.findById(+id);
     return sendResponse(appointment, 'Appointment retrieved successfully', 200);
   }
 
+  // @Put(':id')
+  // @Roles('admin', 'user')
+  // @ApiOperation({ summary: 'Update an appointment' })
+  // @ApiResponse({ status: 200, description: 'Appointment successfully updated', type: Appointments })
+  // async update(@Param('id') id: string, @Body() updateAppointmentDto: Partial<CreateAppointmentDto>) {
+  // const appointment = await this.appointmentsService.update(+id, updateAppointmentDto);
+  // return sendResponse(appointment, 'Appointment updated successfully', 200);
+  // }
+
   @Put(':id')
-  @Roles('admin', 'user')
-  @ApiOperation({ summary: 'Update an appointment' })
-  @ApiResponse({ status: 200, description: 'Appointment successfully updated', type: Appointments })
-  async update(@Param('id') id: string, @Body() updateAppointmentDto: Partial<CreateAppointmentDto>) {
-    const appointment = await this.appointmentsService.update(+id, updateAppointmentDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateAppointmentDto: Partial<CreateAppointmentDto>,
+  ) {
+    const appointment = await this.appointmentsService.update( +id, updateAppointmentDto, );
+
+    // ✅ NEW: reschedule hole new meeting create
+    if (updateAppointmentDto.time) {
+      this.eventEmitter.emit('appointment.rescheduled', appointment);
+    }
     return sendResponse(appointment, 'Appointment updated successfully', 200);
   }
 }
