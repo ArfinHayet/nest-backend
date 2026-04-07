@@ -52,6 +52,10 @@ export class ZoomService {
         start_time: utcDateStr,
         duration,
         timezone: 'UTC', //always utc
+
+        settings: {
+          join_before_host: false, // not join before time
+        },
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
