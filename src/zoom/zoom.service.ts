@@ -42,8 +42,9 @@ export class ZoomService {
     const token = await this.getAccessToken();
 
     // const utcDateStr = new Date(start).toISOString().replace('Z', ''); // "2026-04-06T18:17:00.000" — no Z
-    const utcDateStr = new Date(start).toISOString().split('.')[0] + 'Z';
-
+    // const utcDateStr = new Date(start).toISOString().split('.')[0] + 'Z';
+    const utcDateStr = new Date(start).toISOString();
+    
     const res = await axios.post(
       `https://api.zoom.us/v2/users/${userId}/meetings`,
       {

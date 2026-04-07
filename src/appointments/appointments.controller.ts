@@ -81,11 +81,17 @@ export class AppointmentsController {
   // }
 
   @Put(':id')
+  @Roles('admin', 'user')
+  @ApiOperation({ summary: 'Update an appointment' })
+  @ApiResponse({ status: 200, description: 'Appointment successfully updated', type: Appointments })
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: Partial<CreateAppointmentDto>,
   ) {
-    const appointment = await this.appointmentsService.update( +id, updateAppointmentDto, );
+    const appointment = await this.appointmentsService.update(
+      +id,
+      updateAppointmentDto,
+    );
 
     // ✅ NEW: reschedule hole new meeting create
     if (updateAppointmentDto.time) {
