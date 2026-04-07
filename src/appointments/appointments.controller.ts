@@ -83,20 +83,24 @@ export class AppointmentsController {
   @Put(':id')
   @Roles('admin', 'user')
   @ApiOperation({ summary: 'Update an appointment' })
-  @ApiResponse({ status: 200, description: 'Appointment successfully updated', type: Appointments })
+  @ApiResponse({
+    status: 200,
+    description: 'Appointment successfully updated',
+    type: Appointments,
+  })
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: Partial<CreateAppointmentDto>,
   ) {
-    const appointment = await this.appointmentsService.update(
-      +id,
-      updateAppointmentDto,
-    );
+    await this.appointmentsService.update(+id, updateAppointmentDto);
 
-    // ✅ NEW: reschedule hole new meeting create
+    // ✅ Fresh entity fetch করুন, update()-এর return নয়
+    const appointment = await this.appointmentsService.findById(+id);
+
     if (updateAppointmentDto.time) {
       this.eventEmitter.emit('appointment.rescheduled', appointment);
     }
+
     return sendResponse(appointment, 'Appointment updated successfully', 200);
   }
 }
