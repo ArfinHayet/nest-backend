@@ -48,14 +48,15 @@ export class ZoomService {
       `https://api.zoom.us/v2/users/${userId}/meetings`,
       {
         topic,
-        type: 2,
+        type: 3,
         start_time: utcDateStr,
         duration,
         timezone: 'UTC', //always utc
 
-        // settings: {
-        //   join_before_host: false, // not join before time
-        // },
+        settings: {
+          join_before_host: true,
+          waiting_room: false,
+        },
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
