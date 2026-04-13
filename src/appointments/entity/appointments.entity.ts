@@ -56,8 +56,8 @@ export class Appointments {
   @Column({ type: 'int', nullable: true })
   tries: number;
 
-  @Column({ type: 'text', nullable: true })
-  feedback: string;
+  @Column({ type: 'jsonb', nullable: true })
+  feedback: any;
 
   @Column({ type: 'text', nullable: true })
   diagosis_recommendation: string;
